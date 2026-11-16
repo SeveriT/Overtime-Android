@@ -100,6 +100,7 @@ import dev.anilbeesetti.nextplayer.core.ui.components.TopLevelFabState
 import dev.anilbeesetti.nextplayer.core.ui.components.thenIf
 import dev.anilbeesetti.nextplayer.core.ui.components.tvFocusRing
 import dev.anilbeesetti.nextplayer.core.ui.designsystem.NextIcons
+import dev.anilbeesetti.nextplayer.feature.iptv.navigation.LiveTvRoute
 import dev.anilbeesetti.nextplayer.feature.more.navigation.MoreRoute
 import dev.anilbeesetti.nextplayer.feature.network.navigation.NetworkRoute
 import dev.anilbeesetti.nextplayer.feature.playlist.navigation.PlaylistListRoute
@@ -115,6 +116,13 @@ enum class TopLevelDestination(
     @StringRes val labelRes: Int,
     val fabKey: String? = null,
 ) {
+    // Overtime opens on Live TV.
+    LIVE_TV(
+        LiveTvRoute,
+        NextIcons.LiveTv,
+        R.string.live_tv,
+        TopLevelFabKey.LIVE_TV,
+    ),
     MEDIA(
         MediaPickerRoute(),
         NextIcons.Home,

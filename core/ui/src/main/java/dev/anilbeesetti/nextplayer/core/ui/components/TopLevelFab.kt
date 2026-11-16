@@ -8,6 +8,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.vector.ImageVector
 
 object TopLevelFabKey {
+    const val LIVE_TV = "live_tv"
     const val MEDIA = "media"
     const val PLAYLISTS = "playlists"
     const val NETWORK = "network"

@@ -10,6 +10,7 @@ import dev.anilbeesetti.nextplayer.core.common.di.DispatchersModule
 import dev.anilbeesetti.nextplayer.core.data.DataModule
 import dev.anilbeesetti.nextplayer.core.data.repository.PreferencesRepository
 import dev.anilbeesetti.nextplayer.core.model.ThumbnailGenerationStrategy
+import dev.anilbeesetti.nextplayer.feature.iptv.IptvModule
 import dev.anilbeesetti.nextplayer.feature.network.NetworkModule
 import dev.anilbeesetti.nextplayer.feature.player.PlayerModule
 import dev.anilbeesetti.nextplayer.feature.playlist.PlaylistModule
@@ -25,6 +26,7 @@ import org.koin.core.annotation.Single
     includes = [
         DispatchersModule::class,
         DataModule::class,
+        IptvModule::class,
         NetworkModule::class,
         PlaylistModule::class,
         PlayerModule::class,

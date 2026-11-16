@@ -14,7 +14,8 @@ android {
     defaultConfig {
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        applicationId = "dev.anilbeesetti.nextplayer"
+        // Overtime: its own app id, so it installs alongside Next Player.
+        applicationId = "fi.severi.overtime"
         versionCode = 78
         versionName = "0.21.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -116,6 +117,7 @@ dependencies {
     implementation(project(":core:media"))
     implementation(project(":core:model"))
     implementation(project(":core:ui"))
+    implementation(project(":feature:iptv"))
     implementation(project(":feature:network"))
     implementation(project(":feature:playlist"))
     implementation(project(":feature:videopicker"))
