@@ -30,17 +30,13 @@ object LibraryRoute : NavKey
 @Serializable
 data class TitleRoute(val sourceId: String, val item: LibraryItem) : NavKey
 
-fun NavBackStack<NavKey>.navigateToLibrary() {
-    add(element = LibraryRoute)
-}
-
 fun NavBackStack<NavKey>.navigateToTitle(sourceId: String, item: LibraryItem) {
     add(element = TitleRoute(sourceId = sourceId, item = item))
 }
 
-fun EntryProviderScope<NavKey>.libraryEntry(onBack: () -> Unit, onOpen: (String, LibraryItem) -> Unit) {
+fun EntryProviderScope<NavKey>.libraryEntry(onOpen: (String, LibraryItem) -> Unit) {
     entry<LibraryRoute> {
-        LibraryScreen(viewModel = koinViewModel<LibraryViewModel>(), onBack = onBack, onOpen = onOpen)
+        LibraryScreen(viewModel = koinViewModel<LibraryViewModel>(), onOpen = onOpen)
     }
 }
 

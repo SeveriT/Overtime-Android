@@ -19,6 +19,7 @@
     <string name="live_tv">Live TV</string>
     <string name="live_tv_refresh">Refresh channels and guide</string>
     <string name="library_title">Movies &amp; series</string>
+    <string name="library_no_source">Add an Xtream Codes login in Live TV to browse its movies and series here.</string>
     <string name="library_movies">Movies</string>
     <string name="library_series">Series</string>
     <string name="library_search_movies">Search all movies</string>

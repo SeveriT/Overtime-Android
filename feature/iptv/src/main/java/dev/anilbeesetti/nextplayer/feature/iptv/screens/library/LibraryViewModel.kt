@@ -50,6 +50,15 @@ class LibraryViewModel(private val repository: IptvRepository) : ViewModel() {
         loadCategories()
     }
 
+    /** Picks up Xtream sources added (or removed) since the screen was made. */
+    fun reloadSources() {
+        val sources = repository.librarySources
+        if (sources == _state.value.sources) return
+        val keep = _state.value.sourceId?.takeIf { id -> sources.any { it.id == id } }
+        _state.update { it.copy(sources = sources) }
+        if (keep == null) selectSource(sources.firstOrNull()?.id ?: return)
+    }
+
     fun selectSource(id: String) {
         _state.update { it.copy(sourceId = id, categories = emptyList(), categoryId = null, items = emptyList(), query = "") }
         loadCategories()

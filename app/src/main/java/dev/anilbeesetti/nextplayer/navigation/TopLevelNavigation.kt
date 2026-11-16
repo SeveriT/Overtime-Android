@@ -100,10 +100,10 @@ import dev.anilbeesetti.nextplayer.core.ui.components.TopLevelFabState
 import dev.anilbeesetti.nextplayer.core.ui.components.thenIf
 import dev.anilbeesetti.nextplayer.core.ui.components.tvFocusRing
 import dev.anilbeesetti.nextplayer.core.ui.designsystem.NextIcons
+import dev.anilbeesetti.nextplayer.feature.iptv.navigation.LibraryRoute
 import dev.anilbeesetti.nextplayer.feature.iptv.navigation.LiveTvRoute
 import dev.anilbeesetti.nextplayer.feature.more.navigation.MoreRoute
 import dev.anilbeesetti.nextplayer.feature.network.navigation.NetworkRoute
-import dev.anilbeesetti.nextplayer.feature.playlist.navigation.PlaylistListRoute
 import dev.anilbeesetti.nextplayer.feature.videopicker.navigation.MediaPickerRoute
 
 /**
@@ -116,24 +116,23 @@ enum class TopLevelDestination(
     @StringRes val labelRes: Int,
     val fabKey: String? = null,
 ) {
-    // Overtime opens on Live TV.
-    LIVE_TV(
-        LiveTvRoute,
-        NextIcons.LiveTv,
-        R.string.live_tv,
-        TopLevelFabKey.LIVE_TV,
-    ),
     MEDIA(
         MediaPickerRoute(),
         NextIcons.Home,
         R.string.home,
         TopLevelFabKey.MEDIA,
     ),
-    PLAYLISTS(
-        PlaylistListRoute,
-        NextIcons.Playlist,
-        R.string.playlists,
-        TopLevelFabKey.PLAYLISTS,
+    LIVE_TV(
+        LiveTvRoute,
+        NextIcons.LiveTv,
+        R.string.live_tv,
+        TopLevelFabKey.LIVE_TV,
+    ),
+    // Overtime: Movies & series takes Playlists' place (playlists open inside Home).
+    LIBRARY(
+        LibraryRoute,
+        NextIcons.VideoLibrary,
+        R.string.library_title,
     ),
     NETWORK(
         NetworkRoute,
@@ -147,6 +146,12 @@ enum class TopLevelDestination(
         R.string.more,
         TopLevelFabKey.MORE,
     ),
+    ;
+
+    companion object {
+        /** Where the app opens and where back from another tab returns: Overtime is an IPTV player first. */
+        val START = LIVE_TV
+    }
 }
 
 @Composable
@@ -159,7 +164,7 @@ fun rememberTopLevelNavState(): TopLevelNavState {
         backStack.ensureRoot(dest.route)
         dest.route to backStack
     }
-    val selectedIndex = rememberSaveable { mutableIntStateOf(value = 0) }
+    val selectedIndex = rememberSaveable { mutableIntStateOf(value = destinations.indexOf(TopLevelDestination.START)) }
     return remember(
         backStacks,
         selectedIndex,
@@ -188,7 +193,9 @@ class TopLevelNavState(
     var selectedIndex by selectedIndexState
         private set
 
-    private val startRoute: NavKey get() = destinations.first().route
+    private val startIndex: Int get() = destinations.indexOf(TopLevelDestination.START).coerceAtLeast(0)
+
+    private val startRoute: NavKey get() = destinations[startIndex].route
 
     val topLevelRoute: NavKey get() = destinations[selectedIndex].route
 
@@ -196,7 +203,7 @@ class TopLevelNavState(
     val currentStack: NavBackStack<NavKey> get() = backStacks.getValue(key = topLevelRoute)
 
     private val stacksInUse: List<NavKey>
-        get() = if (selectedIndex == 0) {
+        get() = if (selectedIndex == startIndex) {
             listOf(element = startRoute)
         } else {
             listOf(
@@ -222,7 +229,7 @@ class TopLevelNavState(
         val stack = currentStack
         when {
             stack.size > 1 -> stack.removeLastOrNull()
-            selectedIndex != 0 -> selectedIndex = 0
+            selectedIndex != startIndex -> selectedIndex = startIndex
         }
     }
 

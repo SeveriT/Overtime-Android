@@ -11,6 +11,7 @@ import androidx.compose.material.icons.automirrored.rounded.VolumeUp
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.LiveTv
+import androidx.compose.material.icons.rounded.VideoLibrary
 import androidx.compose.material.icons.rounded.AppSettingsAlt
 import androidx.compose.material.icons.rounded.ArrowDownward
 import androidx.compose.material.icons.rounded.ArrowUpward
@@ -97,6 +98,7 @@ import androidx.compose.material.icons.rounded.Update
 object NextIcons {
     val Add = Icons.Rounded.Add
     val LiveTv = Icons.Rounded.LiveTv
+    val VideoLibrary = Icons.Rounded.VideoLibrary
     val Appearance = Icons.Rounded.Palette
     val ArrowBack = Icons.AutoMirrored.Rounded.ArrowBack
     val ArrowForward = Icons.AutoMirrored.Rounded.ArrowForward

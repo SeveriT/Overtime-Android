@@ -10,7 +10,6 @@ import dev.anilbeesetti.nextplayer.feature.iptv.data.IptvRepository
 import dev.anilbeesetti.nextplayer.feature.iptv.model.Channel
 import dev.anilbeesetti.nextplayer.feature.iptv.navigation.addSourceEntry
 import dev.anilbeesetti.nextplayer.feature.iptv.navigation.libraryEntry
-import dev.anilbeesetti.nextplayer.feature.iptv.navigation.navigateToLibrary
 import dev.anilbeesetti.nextplayer.feature.iptv.navigation.navigateToTitle
 import dev.anilbeesetti.nextplayer.feature.iptv.navigation.titleEntry
 import dev.anilbeesetti.nextplayer.feature.iptv.screens.library.PlayableItem
@@ -26,14 +25,14 @@ fun EntryProviderScope<NavKey>.liveTvNavGraph(context: Context, backStack: NavBa
             addSource = { backStack.navigateToAddSource() },
             editSource = { id -> backStack.navigateToAddSource(sourceId = id) },
             play = { channel, list -> context.playChannel(channel, list) },
-            openLibrary = { backStack.navigateToLibrary() },
         ),
     )
     addSourceEntry(onNavigateUp = { backStack.removeLastIfNotRoot() })
-    libraryEntry(
-        onBack = { backStack.removeLastIfNotRoot() },
-        onOpen = { sourceId, item -> backStack.navigateToTitle(sourceId, item) },
-    )
+}
+
+/** The Movies & series tab: the library, and a title's page on top of it. */
+fun EntryProviderScope<NavKey>.libraryNavGraph(context: Context, backStack: NavBackStack<NavKey>) {
+    libraryEntry(onOpen = { sourceId, item -> backStack.navigateToTitle(sourceId, item) })
     titleEntry(
         onBack = { backStack.removeLastIfNotRoot() },
         onPlay = { items -> context.playQueue(items) },
@@ -44,7 +43,7 @@ fun EntryProviderScope<NavKey>.liveTvNavGraph(context: Context, backStack: NavBa
  * Plays a movie, or an episode followed by the rest of its season: the player's next button and
  * autoplay go on to the next episode, and it resumes each where it was left.
  */
-private fun Context.playQueue(items: List<PlayableItem>) {
+internal fun Context.playQueue(items: List<PlayableItem>) {
     val first = items.firstOrNull() ?: return
     val intent = Intent(this, PlayerActivity::class.java).apply {
         action = Intent.ACTION_VIEW

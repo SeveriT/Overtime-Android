@@ -43,6 +43,7 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,11 +52,13 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import dev.anilbeesetti.nextplayer.core.ui.R
+import dev.anilbeesetti.nextplayer.core.ui.components.LocalNavigationBottomPadding
 import dev.anilbeesetti.nextplayer.core.ui.components.NextTopAppBar
 import dev.anilbeesetti.nextplayer.feature.iptv.model.LibraryItem
 import dev.anilbeesetti.nextplayer.feature.iptv.model.LibraryKind
@@ -63,19 +66,25 @@ import dev.anilbeesetti.nextplayer.feature.iptv.model.LibraryKind
 /** Movies or Series: category chips, search, and a poster grid. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LibraryScreen(viewModel: LibraryViewModel, onBack: () -> Unit, onOpen: (sourceId: String, item: LibraryItem) -> Unit) {
+fun LibraryScreen(viewModel: LibraryViewModel, onOpen: (sourceId: String, item: LibraryItem) -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val bottomPadding = LocalNavigationBottomPadding.current
+    // A tab of its own now: sources added in Live TV meanwhile show up when it's opened again.
+    LaunchedEffect(Unit) { viewModel.reloadSources() }
     Scaffold(
         topBar = {
-            NextTopAppBar(
-                title = stringResource(R.string.library_title),
-                navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.navigate_up)) }
-                },
-            )
+            NextTopAppBar(title = stringResource(R.string.library_title), fontWeight = FontWeight.Bold)
         },
     ) { padding ->
-        Column(Modifier.fillMaxSize().padding(padding)) {
+        Column(Modifier.fillMaxSize().padding(top = padding.calculateTopPadding())) {
+            if (state.sources.isEmpty()) {
+                Text(
+                    stringResource(R.string.library_no_source),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(24.dp),
+                )
+                return@Column
+            }
             if (state.sources.size > 1) {
                 LazyRow(contentPadding = PaddingValues(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(state.sources, key = { it.id }) { source ->
@@ -128,7 +137,7 @@ fun LibraryScreen(viewModel: LibraryViewModel, onBack: () -> Unit, onOpen: (sour
             }
             LazyVerticalGrid(
                 columns = GridCells.Adaptive(minSize = 108.dp),
-                contentPadding = PaddingValues(12.dp),
+                contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 12.dp, bottom = 12.dp + bottomPadding),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp),
                 modifier = Modifier.fillMaxSize(),

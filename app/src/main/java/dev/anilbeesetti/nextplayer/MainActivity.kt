@@ -79,6 +79,7 @@ import dev.anilbeesetti.nextplayer.navigation.mediaNavGraph
 import dev.anilbeesetti.nextplayer.navigation.moreNavGraph
 import dev.anilbeesetti.nextplayer.navigation.navigationTransition
 import dev.anilbeesetti.nextplayer.navigation.navigationTransitionModifier
+import dev.anilbeesetti.nextplayer.navigation.libraryNavGraph
 import dev.anilbeesetti.nextplayer.navigation.liveTvNavGraph
 import dev.anilbeesetti.nextplayer.navigation.networkNavGraph
 import dev.anilbeesetti.nextplayer.navigation.openPlaylist
@@ -167,9 +168,7 @@ class MainActivity : FragmentActivity() {
                     }
 
                     val mediaStack = navState.backStacks.getValue(TopLevelDestination.MEDIA.route)
-                    val playlistStack = navState.backStacks.getValue(
-                        TopLevelDestination.PLAYLISTS.route,
-                    )
+                    val libraryStack = navState.backStacks.getValue(TopLevelDestination.LIBRARY.route)
                     val networkStack = navState.backStacks.getValue(
                         TopLevelDestination.NETWORK.route,
                     )
@@ -187,7 +186,11 @@ class MainActivity : FragmentActivity() {
                         )
                         playlistNavGraph(
                             context = this@MainActivity,
-                            backStack = playlistStack,
+                            backStack = mediaStack,
+                        )
+                        libraryNavGraph(
+                            context = this@MainActivity,
+                            backStack = libraryStack,
                         )
                         networkNavGraph(
                             context = this@MainActivity,
