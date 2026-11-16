@@ -1,20 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Splash: the launcher glyph on the launcher background, a little smaller to sit inside the splash circle. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
-    android:viewportWidth="50"
-    android:viewportHeight="50">
-
+    android:viewportWidth="108"
+    android:viewportHeight="108">
     <path
-        android:pathData="M0,0h108v108h-108z"
-        android:fillColor="@color/ic_launcher_background_tint"/>
-
-    <group android:scaleX="0.4"
-        android:scaleY="0.4"
-        android:translateX="15"
-        android:translateY="15">
+        android:fillColor="@color/ic_launcher_background_tint"
+        android:pathData="M0,0h108v108h-108z" />
+    <group
+        android:scaleX="0.0583333"
+        android:scaleY="0.0583333"
+        android:translateX="26"
+        android:translateY="82">
         <path
             android:fillColor="@color/ic_launcher_foreground_tint"
-            android:pathData="M15.99 42.97c-0.6 0-1.19-0.16-1.71-0.46-1.17-0.66-1.9-1.95-1.9-3.35V10.84c0-1.4 0.73-2.69 1.9-3.35 0.53-0.3 1.14-0.47 1.75-0.46 0.62 0 1.22 0.18 1.74 0.5l24.2 14.49c0.51 0.32 0.93 0.75 1.22 1.28 0.28 0.52 0.43 1.1 0.43 1.7 0 0.6-0.15 1.18-0.43 1.7-0.3 0.52-0.7 0.96-1.21 1.28L17.77 42.47c-0.54 0.32-1.15 0.5-1.78 0.5Z"/>
+            android:pathData="m383-350 267-170-267-170v340Zm-53 230v-80H140q-24 0-42-18t-18-42v-520q0-24 18-42t42-18h680q24 0 42 18t18 42v520q0 24-18 42t-42 18H630v80H330ZM140-260h680v-520H140v520Zm0 0v-520 520Z" />
     </group>
-
 </vector>
