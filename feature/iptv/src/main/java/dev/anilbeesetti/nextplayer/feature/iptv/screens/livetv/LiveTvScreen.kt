@@ -1,5 +1,6 @@
 package dev.anilbeesetti.nextplayer.feature.iptv.screens.livetv
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,7 +21,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.List
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.GridView
 import androidx.compose.material.icons.rounded.ViewTimeline
 import androidx.compose.material.icons.automirrored.rounded.ViewList
 import androidx.compose.material.icons.rounded.LiveTv
@@ -134,22 +138,26 @@ private fun LiveTvContent(state: LiveTvUiState, viewModel: LiveTvViewModel, acti
                 if (state.sources.size > 1) {
                     ChipRow(state.sources.map { it.id to it.name }, state.sourceId) { viewModel.selectSource(it) }
                 }
-                val allLabel = stringResource(R.string.live_tv_all_channels)
-                val favouritesLabel = stringResource(R.string.live_tv_favourites)
-                ChipRow(
-                    state.groups.map {
-                        it to when (it) {
-                            GROUP_ALL -> allLabel
-                            GROUP_FAVORITES -> "★ $favouritesLabel"
-                            else -> it
+                // Back from a group returns to the group list, as on Windows.
+                BackHandler(enabled = state.group != null) { viewModel.backToGroups() }
+                state.group?.let { group ->
+                    Row(Modifier.fillMaxWidth().padding(start = 4.dp, end = 16.dp, top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(onClick = viewModel::backToGroups) {
+                            Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.live_tv_back_to_groups))
                         }
-                    },
-                    state.group.takeIf { state.query.isBlank() },
-                ) { viewModel.selectGroup(it) }
+                        Text(
+                            groupLabel(group),
+                            style = MaterialTheme.typography.titleMedium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+                }
                 OutlinedTextField(
                     value = state.query,
                     onValueChange = viewModel::search,
-                    placeholder = { Text(stringResource(R.string.live_tv_search)) },
+                    placeholder = { Text(stringResource(if (state.group == null) R.string.live_tv_search else R.string.live_tv_search_group)) },
                     leadingIcon = { Icon(Icons.Rounded.Search, contentDescription = null) },
                     trailingIcon = if (state.query.isNotEmpty()) {
                         { IconButton(onClick = { viewModel.search("") }) { Icon(Icons.Rounded.Close, contentDescription = stringResource(R.string.live_tv_clear_search)) } }
@@ -174,6 +182,15 @@ private fun LiveTvContent(state: LiveTvUiState, viewModel: LiveTvViewModel, acti
                         color = if (status is LiveTvStatus.Failed) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
                     )
+                }
+                if (state.group == null && state.query.isBlank()) {
+                    GroupList(
+                        groups = state.groups,
+                        bottomPadding = 8.dp + bottomPadding,
+                        onOpen = viewModel::selectGroup,
+                        onToggleFavorite = viewModel::toggleFavoriteGroup,
+                    )
+                    return@Column
                 }
                 if (state.channels.isEmpty()) {
                     Text(
@@ -212,6 +229,72 @@ private fun LiveTvContent(state: LiveTvUiState, viewModel: LiveTvViewModel, acti
                             onToggleFavorite = { viewModel.toggleFavorite(channel) },
                         )
                     }
+                }
+            }
+        }
+    }
+}
+
+/** "All channels" and "Favourites" are named by the app; playlist groups by the playlist. */
+@Composable
+private fun groupLabel(group: String): String = when (group) {
+    GROUP_ALL -> stringResource(R.string.live_tv_all_channels)
+    GROUP_FAVORITES -> stringResource(R.string.live_tv_favourites)
+    else -> group
+}
+
+/**
+ * Every group of the source, as on Windows: All channels, Favourites, then starred groups and the rest,
+ * each with its channel count and (for the playlist's own groups) a star to pin it to the top.
+ */
+@Composable
+private fun GroupList(
+    groups: List<GroupEntry>,
+    bottomPadding: androidx.compose.ui.unit.Dp,
+    onOpen: (String) -> Unit,
+    onToggleFavorite: (String) -> Unit,
+) {
+    LazyColumn(
+        contentPadding = PaddingValues(start = 8.dp, end = 8.dp, top = 4.dp, bottom = bottomPadding),
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+        items(groups, key = { it.name }) { group ->
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .clickable { onOpen(group.name) }
+                    .padding(start = 12.dp, end = 4.dp, top = 4.dp, bottom = 4.dp)
+                    .height(48.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    when (group.name) {
+                        GROUP_ALL -> Icons.Rounded.GridView
+                        GROUP_FAVORITES -> Icons.Rounded.Star
+                        else -> Icons.Rounded.LiveTv
+                    },
+                    contentDescription = null,
+                    tint = if (group.name == GROUP_FAVORITES) Color(0xFFFFC107) else MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    groupLabel(group.name),
+                    style = MaterialTheme.typography.titleSmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f).padding(horizontal = 16.dp),
+                )
+                Text(group.count.toString(), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                if (group.name != GROUP_ALL && group.name != GROUP_FAVORITES) {
+                    IconButton(onClick = { onToggleFavorite(group.name) }) {
+                        Icon(
+                            if (group.favorite) Icons.Rounded.Star else Icons.Rounded.StarBorder,
+                            contentDescription = stringResource(if (group.favorite) R.string.live_tv_unstar_group else R.string.live_tv_star_group),
+                            tint = if (group.favorite) Color(0xFFFFC107) else MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                } else {
+                    Spacer(Modifier.size(48.dp))
                 }
             }
         }

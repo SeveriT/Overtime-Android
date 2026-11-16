@@ -38,6 +38,10 @@
     <string name="live_tv_add_source">Add source</string>
     <string name="live_tv_add_a_source">Add a source</string>
     <string name="live_tv_search">Search channels</string>
+    <string name="live_tv_search_group">Search in this group</string>
+    <string name="live_tv_back_to_groups">Back to groups</string>
+    <string name="live_tv_star_group">Star group</string>
+    <string name="live_tv_unstar_group">Unstar group</string>
     <string name="live_tv_clear_search">Clear search</string>
     <string name="live_tv_all_channels">All channels</string>
     <string name="live_tv_favourites">Favourites</string>

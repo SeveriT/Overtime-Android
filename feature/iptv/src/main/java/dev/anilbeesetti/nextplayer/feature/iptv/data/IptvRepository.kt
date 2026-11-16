@@ -56,6 +56,16 @@ class IptvRepository(context: Context) {
     private val _favorites = MutableStateFlow(readSet(FAVORITES))
     val favorites: StateFlow<Set<String>> = _favorites.asStateFlow()
 
+    /** Starred channel groups as "<source id>|<group>": listed first, as on Windows. */
+    private val _favoriteGroups = MutableStateFlow(readSet(FAVORITE_GROUPS))
+    val favoriteGroups: StateFlow<Set<String>> = _favoriteGroups.asStateFlow()
+
+    fun toggleFavoriteGroup(sourceId: String, group: String) {
+        val key = "$sourceId|$group"
+        _favoriteGroups.update { if (key in it) it - key else it + key }
+        File(dir, FAVORITE_GROUPS).writeText(json.encodeToString(SetSerializer(String.serializer()), _favoriteGroups.value))
+    }
+
     fun newSourceId(): String = UUID.randomUUID().toString().take(8)
 
     private var launchRefreshDone = false
@@ -188,5 +198,6 @@ class IptvRepository(context: Context) {
         const val USER_AGENT = "VLC/3.0.24 LibVLC/3.0.24"
         private const val SOURCES = "sources.json"
         private const val FAVORITES = "favorites.json"
+        private const val FAVORITE_GROUPS = "favorite_groups.json"
     }
 }

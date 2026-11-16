@@ -22,12 +22,16 @@ const val GROUP_FAVORITES = "\u0000favourites"
 /** The pseudo-group listing every channel of the source. */
 const val GROUP_ALL = "\u0000all"
 
+/** A row of the group list: a group, how many channels it has, and whether it's starred. */
+data class GroupEntry(val name: String, val count: Int, val favorite: Boolean = false)
+
 data class LiveTvUiState(
     val sources: List<IptvSource> = emptyList(),
     val sourceId: String? = null,
-    /** Groups of the selected source, in playlist order, after All and Favourites. */
-    val groups: List<String> = emptyList(),
-    val group: String = GROUP_ALL,
+    /** All channels and Favourites, then starred groups, then the rest, each in playlist order. */
+    val groups: List<GroupEntry> = emptyList(),
+    /** The opened group; null shows the group list (as Windows' sidebar opens on it). */
+    val group: String? = null,
     val query: String = "",
     val channels: List<Channel> = emptyList(),
     val favorites: Set<String> = emptySet(),
@@ -52,25 +56,36 @@ class LiveTvViewModel(private val repository: IptvRepository) : ViewModel() {
     private val status = MutableStateFlow<LiveTvStatus?>(null)
     private val clock = MutableStateFlow(System.currentTimeMillis())
 
-    private data class Selection(val sourceId: String? = null, val group: String = GROUP_ALL, val query: String = "", val guide: Boolean = false)
+    private data class Selection(val sourceId: String? = null, val group: String? = null, val query: String = "", val guide: Boolean = false)
 
     val state: StateFlow<LiveTvUiState> = combine(
         repository.sources,
         repository.channels,
-        repository.favorites,
+        combine(repository.favorites, repository.favoriteGroups) { f, g -> f to g },
         repository.epg,
         combine(selection, status, clock) { s, st, c -> Triple(s, st, c) },
-    ) { sources, channelsBySource, favorites, epg, (sel, st, now) ->
+    ) { sources, channelsBySource, (favorites, favoriteGroups), epg, (sel, st, now) ->
         val sourceId = sel.sourceId?.takeIf { id -> sources.any { it.id == id } } ?: sources.firstOrNull()?.id
         val all = sourceId?.let(channelsBySource::get).orEmpty()
-        val groups = listOf(GROUP_ALL, GROUP_FAVORITES) + all.map { it.group }.distinct()
-        val group = sel.group.takeIf { it in groups } ?: GROUP_ALL
-        val q = sel.query.trim()
-        val shown = when {
-            q.isNotEmpty() -> all.filter { it.name.contains(q, ignoreCase = true) }
-            group == GROUP_ALL -> all
-            group == GROUP_FAVORITES -> all.filter { it.id in favorites }
+        val counts = LinkedHashMap<String, Int>()
+        all.forEach { counts[it.group] = (counts[it.group] ?: 0) + 1 }
+        val own = counts.map { (name, count) -> GroupEntry(name, count, favorite = "$sourceId|$name" in favoriteGroups) }
+        val groups = listOf(
+            GroupEntry(GROUP_ALL, all.size),
+            GroupEntry(GROUP_FAVORITES, all.count { it.id in favorites }),
+        ) + own.filter { it.favorite } + own.filterNot { it.favorite }
+        val group = sel.group?.takeIf { name -> groups.any { it.name == name } }
+        val inGroup = when (group) {
+            null, GROUP_ALL -> all
+            GROUP_FAVORITES -> all.filter { it.id in favorites }
             else -> all.filter { it.group == group }
+        }
+        val q = sel.query.trim()
+        // Searching from the group list covers every channel; inside a group, just that group.
+        val shown = when {
+            q.isNotEmpty() -> inGroup.filter { it.name.contains(q, ignoreCase = true) }
+            group == null -> emptyList()
+            else -> inGroup
         }
         LiveTvUiState(
             sources = sources,
@@ -104,6 +119,15 @@ class LiveTvViewModel(private val repository: IptvRepository) : ViewModel() {
 
     fun selectSource(id: String) {
         selection.value = Selection(sourceId = id, guide = selection.value.guide)
+    }
+
+    fun backToGroups() {
+        selection.value = selection.value.copy(group = null, query = "")
+    }
+
+    fun toggleFavoriteGroup(group: String) {
+        val sourceId = state.value.sourceId ?: return
+        repository.toggleFavoriteGroup(sourceId, group)
     }
 
     fun toggleGuide() {
