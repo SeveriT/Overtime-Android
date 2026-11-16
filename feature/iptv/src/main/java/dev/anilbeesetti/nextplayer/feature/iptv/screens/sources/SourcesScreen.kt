@@ -28,7 +28,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import dev.anilbeesetti.nextplayer.core.ui.designsystem.NextIcons
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,10 +64,12 @@ import org.koin.core.annotation.KoinViewModel
 data class SourceRow(val source: IptvSource, val channels: Int)
 
 @KoinViewModel
-class SourcesViewModel(repository: IptvRepository) : ViewModel() {
+class SourcesViewModel(private val repository: IptvRepository) : ViewModel() {
     val rows: StateFlow<List<SourceRow>> = combine(repository.sources, repository.channels) { sources, channels ->
         sources.map { SourceRow(it, channels[it.id]?.size ?: 0) }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    fun saveOrder(ids: List<String>) = repository.reorderSources(ids)
 }
 
 /** Every playlist and login, like the Sources dialog on Windows: tap one to edit or delete it, or add another. */
@@ -65,6 +77,16 @@ class SourcesViewModel(repository: IptvRepository) : ViewModel() {
 @Composable
 fun SourcesScreen(viewModel: SourcesViewModel, onBack: () -> Unit, onAdd: () -> Unit, onEdit: (String) -> Unit) {
     val rows by viewModel.rows.collectAsStateWithLifecycle()
+    // Dragged locally for smooth movement; saved when the drag ends.
+    var shown by remember { mutableStateOf(rows) }
+    var dragging by remember { mutableStateOf(false) }
+    LaunchedEffect(rows) { if (!dragging) shown = rows }
+    val haptics = LocalHapticFeedback.current
+    val listState = rememberLazyListState()
+    val reorderState = rememberReorderableLazyListState(lazyListState = listState) { from, to ->
+        shown = shown.toMutableList().apply { add(to.index, removeAt(from.index)) }
+        haptics.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
+    }
     Scaffold(
         topBar = {
             NextTopAppBar(
@@ -84,25 +106,44 @@ fun SourcesScreen(viewModel: SourcesViewModel, onBack: () -> Unit, onAdd: () -> 
     ) { padding ->
         LazyColumn(
             Modifier.fillMaxSize().padding(padding),
+            state = listState,
             contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 8.dp, bottom = 96.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            if (rows.isEmpty()) {
+            if (shown.isEmpty()) {
                 item {
                     Text(stringResource(R.string.live_tv_empty), color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(12.dp))
                 }
             }
-            items(rows, key = { it.source.id }) { row ->
+            items(shown, key = { it.source.id }) { row ->
+              ReorderableItem(reorderState, key = row.source.id) { isDragging ->
                 Row(
                     Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
-                        .background(MaterialTheme.colorScheme.surfaceContainer)
+                        .background(if (isDragging) MaterialTheme.colorScheme.surfaceContainerHighest else MaterialTheme.colorScheme.surfaceContainer)
                         .clickable { onEdit(row.source.id) }
-                        .padding(horizontal = 16.dp, vertical = 14.dp),
+                        .padding(start = 4.dp, end = 16.dp, top = 14.dp, bottom = 14.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
+                    // Drag here to move the source up or down.
+                    Icon(
+                        NextIcons.DragHandle,
+                        contentDescription = stringResource(R.string.iptv_reorder),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(40.dp).padding(8.dp).draggableHandle(
+                            onDragStarted = {
+                                dragging = true
+                                haptics.performHapticFeedback(HapticFeedbackType.GestureThresholdActivate)
+                            },
+                            onDragStopped = {
+                                dragging = false
+                                viewModel.saveOrder(shown.map { it.source.id })
+                                haptics.performHapticFeedback(HapticFeedbackType.GestureEnd)
+                            },
+                        ),
+                    )
                     Box(
                         Modifier.size(40.dp).clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.secondaryContainer),
                         contentAlignment = Alignment.Center,
@@ -124,6 +165,7 @@ fun SourcesScreen(viewModel: SourcesViewModel, onBack: () -> Unit, onAdd: () -> 
                     }
                     Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, contentDescription = stringResource(R.string.iptv_edit_source))
                 }
+              }
             }
         }
     }

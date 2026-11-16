@@ -58,6 +58,7 @@
     <string name="live_tv_source_error">%1$s: %2$s</string>
     <string name="iptv_edit_source">Edit source</string>
     <string name="iptv_sources">Sources</string>
+    <string name="iptv_reorder">Drag to reorder</string>
     <plurals name="iptv_channel_count">
         <item quantity="one">%1$d channel</item>
         <item quantity="other">%1$d channels</item>

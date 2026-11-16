@@ -83,6 +83,15 @@ class IptvRepository(context: Context) {
         writeList(SOURCES, ListSerializer(IptvSource.serializer()), _sources.value)
     }
 
+    /** Puts the sources in the order of [ids] (the order they're listed and switched between). */
+    fun reorderSources(ids: List<String>) {
+        val byId = _sources.value.associateBy { it.id }
+        val ordered = ids.mapNotNull(byId::get) + _sources.value.filterNot { it.id in ids }
+        if (ordered == _sources.value) return
+        _sources.value = ordered
+        writeList(SOURCES, ListSerializer(IptvSource.serializer()), ordered)
+    }
+
     fun removeSource(id: String) {
         _sources.update { list -> list.filterNot { it.id == id } }
         writeList(SOURCES, ListSerializer(IptvSource.serializer()), _sources.value)
