@@ -1,134 +1,72 @@
-![Next player banner](fastlane/metadata/android/en-US/images/featureGraphic.png)
+# Overtime for Android
 
-# Next Player
+Overtime is an IPTV player for Android phones and tablets: live TV with a TV guide, movies and series from your provider, and Continue watching. It is the Android companion of the Overtime Windows app.
 
-[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/anilbeesetti/nextplayer.svg?logo=github&label=GitHub&cacheSeconds=3600)](https://github.com/anilbeesetti/nextplayer/releases/latest)
-[![Google Play](https://img.shields.io/endpoint?color=green&logo=google-play&url=https%3A%2F%2Fplay.cuzi.workers.dev%2Fplay%3Fi%3Ddev.anilbeesetti.nextplayer%26l%3DGoogle%2520Play%26m%3Dv%24version)](https://play.google.com/store/apps/details?id=dev.anilbeesetti.nextplayer)
-[![IzzyOnDroid](https://img.shields.io/endpoint?url=https://apt.izzysoft.de/fdroid/api/v1/shield/dev.anilbeesetti.nextplayer)](https://apt.izzysoft.de/fdroid/index/apk/dev.anilbeesetti.nextplayer)
-[![F-Droid](https://img.shields.io/f-droid/v/dev.anilbeesetti.nextplayer?logo=f-droid&label=F-Droid&cacheSeconds=3600)](https://f-droid.org/packages/dev.anilbeesetti.nextplayer)
-[![GitHub all releases](https://img.shields.io/github/downloads/anilbeesetti/nextplayer/total?logo=github&cacheSeconds=3600)](https://github.com/anilbeesetti/nextplayer/releases/latest)
-[![Google Play](https://img.shields.io/endpoint?color=green&logo=google-play&url=https%3A%2F%2Fplay.cuzi.workers.dev%2Fplay%3Fi%3Ddev.anilbeesetti.nextplayer%26l%3Ddownloads%26m%3D%24totalinstalls)](https://play.google.com/store/apps/details?id=dev.anilbeesetti.nextplayer)
-[![Weblate project translated](https://img.shields.io/weblate/progress/next-player?logo=weblate&logoColor=white&cacheSeconds=36000)](https://hosted.weblate.org/engage/next-player/)
-
-Next Player is an Android native video player written in Kotlin. It provides a simple and easy-to-use interface for users to play videos on their
-Android devices
-
-**This project is still in development and is expected to have bugs. Please report any bugs you find in
-the [Issues](https://github.com/anilbeesetti/nextplayer/issues) section.**
-
-[<img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" alt="Get it on Google Play" height="80"/>](https://play.google.com/store/apps/details?id=dev.anilbeesetti.nextplayer)
-[<img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" alt="Get it on IzzyOnDroid" height="80">](https://apt.izzysoft.de/fdroid/index/apk/dev.anilbeesetti.nextplayer)
-[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" height="80">](https://f-droid.org/packages/dev.anilbeesetti.nextplayer/)
-
-> For Github releases, you can verify the app with the SHA-256 fingerprint certificate: `D3:7C:AB:F3:67:6C:F5:82:24:FB:24:2C:8D:D2:09:12:9D:05:88:03:79:29:5F:AA:A6:D0:FB:60:7B:EC:13:1B`
-
-## Screenshots
-
-### Phone
-
-<div style="width:100%; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
-
-[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" width=19% alt="Home folders">](fastlane/metadata/android/en-US/images/phoneScreenshots/1.png)
-[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" width=19% alt="Demo folder videos">](fastlane/metadata/android/en-US/images/phoneScreenshots/2.png)
-[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/3.png" width=19% alt="Quick settings">](fastlane/metadata/android/en-US/images/phoneScreenshots/3.png)
-[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.png" width=19% alt="Grid view">](fastlane/metadata/android/en-US/images/phoneScreenshots/4.png)
-[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/6.png" width=19% alt="Search results">](fastlane/metadata/android/en-US/images/phoneScreenshots/6.png)
-[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/7.png" width=19% alt="Add network connection">](fastlane/metadata/android/en-US/images/phoneScreenshots/7.png)
-[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/8.png" width=19% alt="Appearance settings">](fastlane/metadata/android/en-US/images/phoneScreenshots/8.png)
-</div>
-
-### Player UI
-
-<div style="width:100%; display:flex; justify-content:space-between;">
-
-[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/5.png" width=49% alt="Phone player controls">](fastlane/metadata/android/en-US/images/phoneScreenshots/5.png)
-[<img src="fastlane/metadata/android/en-US/images/tvScreenshots/3.png" width=49% alt="TV player controls">](fastlane/metadata/android/en-US/images/tvScreenshots/3.png)
-</div>
-
-### Android TV
-
-<div style="width:100%; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
-
-[<img src="fastlane/metadata/android/en-US/images/tvScreenshots/1.png" width=49% alt="TV home folders">](fastlane/metadata/android/en-US/images/tvScreenshots/1.png)
-[<img src="fastlane/metadata/android/en-US/images/tvScreenshots/2.png" width=49% alt="TV demo folder videos">](fastlane/metadata/android/en-US/images/tvScreenshots/2.png)
-[<img src="fastlane/metadata/android/en-US/images/tvScreenshots/4.png" width=49% alt="TV appearance settings">](fastlane/metadata/android/en-US/images/tvScreenshots/4.png)
-</div>
-
-## Player intent API
-
-Next Player supports MX Player-compatible VIEW intents, with additional playback
-speed and direct background-play options. See the [Player intent API reference](PLAYER_API.md)
-for integration examples, supported extras, URI permissions, playback results,
-and compatibility details.
-
-## Supported formats
-
-- **Video**: H.263, H.264 AVC (Baseline Profile; Main Profile on Android 6+), H.265 HEVC, MPEG-4 SP, VP8, VP9, AV1
-    - Support depends on Android device
-- **Audio**: Vorbis, Opus, FLAC, ALAC, PCM/WAVE (μ-law, A-law), MP1, MP2, MP3, AMR (NB, WB), AAC (LC, ELD, HE; xHE on Android 9+), AC-3, E-AC-3, DTS,
-  DTS-HD, TrueHD
-    - Support provided by ExoPlayer FFmpeg extension
-- **Subtitles**: SRT, SSA, ASS, TTML, VTT, DVB
-    - SSA/ASS has limited styling support see [this issue](https://github.com/google/ExoPlayer/issues/8435)
+It's built on [Next Player](https://github.com/anilbeesetti/nextplayer), so it also plays your own videos, network shares and streams.
 
 ## Features
 
-- Native Android app with simple and easy-to-use interface
-- Completely free and open source and without any ads or excessive permissions
-- Software decoders for h264 and hevc
-- Audio/Subtitle track selection
-- Vertical swipe to change brightness (left) / volume (right)
-- Horizontal swipe to seek through video
-- [Material 3 (You)](https://m3.material.io/) support
-- Media picker with tree, folder and file view modes
-- Play videos from url
-- Play videos from storage access framework (Android Document picker)
-- Control playback speed
-- External Subtitle support
-- Zoom gesture
-- Picture-in-picture mode
-- Background playback
-- Android TV version
-- Search Functionality
-- Subtitle delay
-- Network storage support (SMB/FTP/SFTP/WebDAV)
+### Live TV
 
-## Planned Features
+- M3U playlist links and Xtream Codes logins
+- Several sources at once, switchable from chips and reorderable by dragging
+- Channel groups as a full list, with favourite groups pinned to the top in their original order
+- Favourite channels
+- Channel search
+- Now and next programme on every channel, with progress
+- TV guide grid with a 12-hour timeline, a now line and programme details
+- Guides read from the playlist or set by hand (several addresses allowed), cached for 12 hours
+- Automatic refresh when the app opens, plus manual refresh
+- Next and previous channel in the player
 
-- External Audio support
-- Online subtitles download
+### Movies & series
 
-## Contributing
+- Movie and series library from Xtream Codes sources
+- Categories, search, posters, ratings and years
+- Details page with plot, genre, cast and backdrop
+- Seasons and episodes
+- An episode plays with the rest of its season queued, so next episode and autoplay work
+- Playback resumes where it was left
 
-Contributions are welcome!
+### Continue watching
 
-### Developer documentation
+- Own tab in the navigation bar
+- One card per movie or series, newest first, with artwork, progress and time left
+- Resume a movie or episode, or start the next episode once one is finished
+- Series stay until dismissed; finished movies leave by themselves
+- Dismiss button on every card
 
-- [Runtime decoder switching](feature/player/DECODER_SWITCHING.md)
+### Player and library (from Next Player)
 
-### Translating
+- Local videos with tree, folder and file views, search and history
+- Network storage (SMB, FTP, SFTP, WebDAV) and network stream URLs, under More
+- Playlists, under More, with home-screen shortcuts
+- Audio and subtitle track selection, external subtitles, subtitle delay
+- Hardware and software decoders (FFmpeg audio extension)
+- Swipe for brightness, volume and seeking; zoom gesture
+- Playback speed, picture-in-picture and background playback
+- Material 3 design with dynamic colours
 
-You can help translate Next Player on [Hosted Weblate](https://hosted.weblate.org/engage/next-player/).
+## Supported formats
 
-[![Translate status](https://hosted.weblate.org/widgets/next-player/-/multi-auto.svg)](https://hosted.weblate.org/engage/next-player/)
+- **Video**: H.263, H.264 AVC, H.265 HEVC, MPEG-4 SP, VP8, VP9, AV1 (support depends on the device)
+- **Audio**: Vorbis, Opus, FLAC, ALAC, PCM/WAVE, MP1, MP2, MP3, AMR, AAC, AC-3, E-AC-3, DTS, DTS-HD, TrueHD
+- **Subtitles**: SRT, SSA, ASS, TTML, VTT, DVB
+
+## Building
+
+Open the project in Android Studio, or build from the command line with the JDK bundled with Android Studio:
+
+```
+./gradlew :app:assembleDebug
+```
+
+The IPTV features live in the `feature/iptv` module.
 
 ## Credits
 
-### Open Source Projects
-
-- [Findroid](https://github.com/jarnedemeulemeester/findroid)
-- [Just (Video) Player](https://github.com/moneytoo/Player)
-- [LibreTube](https://github.com/libre-tube/LibreTube)
-- [ReadYou](https://github.com/Ashinch/ReadYou)
-- [Seal](https://github.com/JunkFood02/Seal)
-- ...
-
-### Special Thanks
-
-[<img src="https://hosted.weblate.org/widgets/next-player/-/287x66-white.png"  width="200"/>](https://hosted.weblate.org/engage/next-player/)
-
-Thanks to **Weblate** for providing free hosting for the project.
+Overtime for Android is based on [Next Player](https://github.com/anilbeesetti/nextplayer) by Anil Kumar Beesetti and its contributors.
 
 ## License
 
-Next Player is licensed under the GNU General Public License v3.0. See the [LICENSE](LICENSE) file for more information.
+Licensed under the GNU General Public License v3.0, like Next Player. See the [LICENSE](LICENSE) file.
