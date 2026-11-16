@@ -160,6 +160,11 @@ private fun Context.playChannel(channel: Channel, list: List<Channel>) {
             "video_list.name",
             queue.map { it.name }.toTypedArray(),
         )
+        // Recorded while watched, so live TV can be paused and rewound.
+        putExtra(
+            PlayerApi.API_LIVE,
+            true,
+        )
     }
     startActivity(intent)
 }

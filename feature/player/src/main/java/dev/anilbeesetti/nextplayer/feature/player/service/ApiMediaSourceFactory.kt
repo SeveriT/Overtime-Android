@@ -7,7 +7,12 @@ import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DataSpec
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.source.MediaSource
+import androidx.media3.exoplayer.source.ProgressiveMediaSource
+import androidx.media3.extractor.DefaultExtractorsFactory
+import dev.anilbeesetti.nextplayer.feature.player.timeshift.Timeshift
+import dev.anilbeesetti.nextplayer.feature.player.timeshift.TimeshiftDataSource
 import dev.anilbeesetti.nextplayer.feature.player.utils.apiHeaders
+import dev.anilbeesetti.nextplayer.feature.player.utils.isApiLive
 import io.github.anilbeesetti.nextlib.media3ext.ffdecoder.FfmpegSubtitleExtractorsFactory
 import io.github.anilbeesetti.nextlib.media3ext.ffdecoder.withFfmpegSubtitles
 
@@ -16,10 +21,24 @@ import io.github.anilbeesetti.nextlib.media3ext.ffdecoder.withFfmpegSubtitles
 internal class ApiMediaSourceFactory(
     private val context: Context,
     private val dataSourceFactory: DataSource.Factory,
+    private val timeshift: Timeshift? = null,
 ) : MediaSource.Factory by DefaultMediaSourceFactory(
     context,
 ).setDataSourceFactory(dataSourceFactory) {
     override fun createMediaSource(mediaItem: MediaItem): MediaSource {
+        // Overtime: a live channel plays from its rewind recording (unless it can't be recorded).
+        val uri = mediaItem.localConfiguration?.uri?.toString()
+        if (timeshift != null && uri != null && mediaItem.isApiLive && !timeshift.isDirect(uri) &&
+            mediaItem.localConfiguration?.customCacheKey != "direct"
+        ) {
+            return ProgressiveMediaSource.Factory(
+                TimeshiftDataSource.Factory(
+                    timeshift,
+                    mediaItem.apiHeaders,
+                ),
+                DefaultExtractorsFactory(),
+            ).createMediaSource(mediaItem)
+        }
         val sources = RequestHeadersDataSourceFactory(
             dataSourceFactory,
             mediaItem.apiHeaders,

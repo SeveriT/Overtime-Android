@@ -152,6 +152,13 @@ class PlayerApi(private val intent: Intent) {
                                 API_HEADERS_KEY,
                                 headers,
                             )
+                            // Overtime: live channels are recorded so they can be paused and rewound.
+                            if (boolean(API_LIVE) == true) {
+                                putBoolean(
+                                    API_LIVE_KEY,
+                                    true,
+                                )
+                            }
                             if (index == selectedIndex &&
                                 hasPosition
                             ) {
@@ -234,6 +241,9 @@ class PlayerApi(private val intent: Intent) {
         const val API_SUBS_ENABLE = "subs.enable"
         const val API_SUBS_NAME = "subs.name"
         const val API_PLAYLIST = "video_list"
+
+        /** Overtime: the playlist is live TV channels (recorded for live rewind). */
+        const val API_LIVE = "overtime.live"
         const val API_RESULT_INTENT = "com.mxtech.intent.result.VIEW"
 
         private val ORIENTATIONS = setOf(
@@ -262,6 +272,7 @@ class PlayerApi(private val intent: Intent) {
             "decode_mode",
             "video",
             "headers",
+            API_LIVE,
             "video_zoom",
             "sticky",
             "orientation",
@@ -276,6 +287,11 @@ class PlayerApi(private val intent: Intent) {
 
 private const val API_HEADERS_KEY = "dev.anilbeesetti.nextplayer.api.HEADERS"
 private const val API_POSITION_KEY = "dev.anilbeesetti.nextplayer.api.POSITION"
+private const val API_LIVE_KEY = "dev.anilbeesetti.nextplayer.api.LIVE"
+
+/** A live TV channel from Overtime: played through the live rewind recorder. */
+internal val MediaItem.isApiLive: Boolean
+    get() = requestMetadata.extras?.getBoolean(API_LIVE_KEY) == true
 
 internal val MediaItem.apiHeaders: Map<String, String>
     get() = requestMetadata.extras?.getBundle(API_HEADERS_KEY)?.let { headers ->

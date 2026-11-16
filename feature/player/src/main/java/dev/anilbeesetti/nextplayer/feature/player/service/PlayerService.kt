@@ -75,6 +75,8 @@ import dev.anilbeesetti.nextplayer.feature.player.extensions.videoDecoderMode
 import dev.anilbeesetti.nextplayer.feature.player.extensions.videoZoom
 import dev.anilbeesetti.nextplayer.feature.player.extensions.withExternalAudio
 import dev.anilbeesetti.nextplayer.feature.player.model.DecoderTrackType
+import dev.anilbeesetti.nextplayer.feature.player.timeshift.Timeshift
+import dev.anilbeesetti.nextplayer.feature.player.timeshift.TimeshiftPlayer
 import dev.anilbeesetti.nextplayer.feature.player.utils.hasApiPosition
 import dev.anilbeesetti.nextplayer.feature.player.utils.isExplicitPlaylistItem
 import io.github.anilbeesetti.nextlib.media3ext.ffdecoder.DecoderManager
@@ -919,8 +921,19 @@ class PlayerService : MediaSessionService() {
         )
     }
 
+    /** Overtime: live rewind recordings, kept in the cache folder. */
+    private val timeshift by lazy {
+        Timeshift(
+            java.io.File(
+                cacheDir,
+                "timeshift",
+            ),
+        )
+    }
+
     override fun onCreate() {
         super.onCreate()
+        timeshift.clearLeftovers()
         decoderManager = DecoderManager()
         val renderersFactory = NextRenderersFactory(
             context = applicationContext,
@@ -943,6 +956,7 @@ class PlayerService : MediaSessionService() {
                     ApiMediaSourceFactory(
                         applicationContext,
                         dataSourceFactory,
+                        timeshift,
                     ),
                 ),
             )
@@ -972,7 +986,11 @@ class PlayerService : MediaSessionService() {
         try {
             mediaSession = MediaSession.Builder(
                 this,
-                player,
+                // Overtime: makes recorded live channels seekable (live rewind).
+                TimeshiftPlayer(
+                    player,
+                    timeshift,
+                ),
             ).apply {
                 // Some Android 15 ROMs recycle shared artwork when resizing it above 500px.
                 setBitmapLoader(
@@ -1063,6 +1081,7 @@ class PlayerService : MediaSessionService() {
             release()
             mediaSession = null
         }
+        timeshift.stop()
         // Queue release before a new service can open another connection.
         applicationScope.launch(start = CoroutineStart.UNDISPATCHED) { dataSourceFactory.release() }
         serviceScope.cancel()
