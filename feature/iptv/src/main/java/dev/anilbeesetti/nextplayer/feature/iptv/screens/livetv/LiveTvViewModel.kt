@@ -150,20 +150,23 @@ class LiveTvViewModel(private val repository: IptvRepository) : ViewModel() {
      */
     fun refreshAll(quiet: Boolean = false) {
         viewModelScope.launch {
+            var failure: LiveTvStatus.Failed? = null
             for (source in repository.sources.value) {
                 try {
                     status.value = LiveTvStatus.Loading(source.name, guide = false, quiet = quiet)
                     repository.refreshChannels(source)
-                    status.value = LiveTvStatus.Loading(source.name, guide = true, quiet = quiet)
-                    repository.refreshGuide(source)
-                    status.value = null
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
                     val hasChannels = repository.channels.value[source.id].orEmpty().isNotEmpty()
-                    status.value = if (quiet && hasChannels) null else LiveTvStatus.Failed(source.name, e.message ?: e::class.simpleName.orEmpty())
+                    if (!(quiet && hasChannels)) failure = failure ?: LiveTvStatus.Failed(source.name, e.message ?: e::class.simpleName.orEmpty())
                 }
+                // Guides are kept a while (hosts limit downloads); a source left with no guide at all says why.
+                status.value = LiveTvStatus.Loading(source.name, guide = true, quiet = quiet)
+                val maxAge = if (quiet) IptvRepository.GUIDE_MAX_AGE_MS else IptvRepository.GUIDE_MANUAL_MAX_AGE_MS
+                repository.refreshGuide(source, maxAge)?.let { failure = failure ?: LiveTvStatus.Failed(source.name, it) }
             }
+            status.value = failure
         }
     }
 }

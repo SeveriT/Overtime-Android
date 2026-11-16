@@ -63,7 +63,8 @@ class AddSourceViewModel(
                 repository.saveSource(source)
                 onDone()
                 // The guide can take a while; it fills in on the Live TV screen.
-                runCatching { repository.refreshGuide(source) }
+                // Always fetched anew here: the guide address may just have changed.
+                runCatching { repository.refreshGuide(source, maxAgeMs = 0) }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {

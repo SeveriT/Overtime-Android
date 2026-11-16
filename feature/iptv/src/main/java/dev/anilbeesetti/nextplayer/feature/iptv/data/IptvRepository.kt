@@ -145,20 +145,40 @@ class IptvRepository(context: Context) {
     }
 
     /** Downloads and caches the guides for a source; keeps the last good copy of any that fail. */
-    suspend fun refreshGuide(source: IptvSource): Unit = withContext(Dispatchers.IO) {
+    /**
+     * Downloads the guides for a source, unless the cached copy is younger than [maxAgeMs]: guide hosts
+     * often limit downloads per day (m3u4u answers "download limit reached" instead of the guide).
+     * A guide that fails keeps its last good copy. Returns why no guide could be had, or null.
+     */
+    suspend fun refreshGuide(source: IptvSource, maxAgeMs: Long = GUIDE_MAX_AGE_MS): String? = withContext(Dispatchers.IO) {
         val urls = guideUrls(source)
         var merged = EpgData()
+        var problem: String? = null
         urls.forEachIndexed { index, url ->
             val file = File(dir, "epg_${source.id}_$index.xml")
-            runCatching {
-                val bytes = fetchBytes(url)
-                val parsed = XmltvParser.parse(bytes.inputStream())
-                if (!parsed.isEmpty) file.writeBytes(bytes)
-                parsed
-            }.getOrNull()?.takeIf { !it.isEmpty }?.let { merged += it }
-                ?: runCatching { file.inputStream().use(XmltvParser::parse) }.getOrNull()?.let { merged += it }
+            val fresh = file.isFile && System.currentTimeMillis() - file.lastModified() < maxAgeMs
+            val downloaded = if (fresh) {
+                null
+            } else {
+                runCatching {
+                    val bytes = fetchBytes(url)
+                    val parsed = XmltvParser.parse(bytes.inputStream())
+                    if (parsed.isEmpty) throw IOException(notAGuide(bytes))
+                    file.writeBytes(bytes)
+                    parsed
+                }.onFailure { if (problem == null) problem = it.message ?: it::class.simpleName }.getOrNull()
+            }
+            (downloaded ?: runCatching { file.inputStream().use(XmltvParser::parse) }.getOrNull())?.let { merged += it }
         }
         _epg.update { it + (source.id to merged) }
+        problem.takeIf { merged.isEmpty }
+    }
+
+    /** What a guide host sent instead of a guide: the text of its page (e.g. a download-limit notice). */
+    private fun notAGuide(bytes: ByteArray): String {
+        val text = runCatching { bytes.copyOf(minOf(bytes.size, 2_000)).decodeToString() }.getOrDefault("")
+        val readable = text.replace(Regex("<[^>]*>"), " ").replace(Regex("\\s+"), " ").trim().take(160)
+        return if (readable.isNotEmpty() && !text.trimStart().startsWith("<?xml")) "Guide server says: $readable" else "The guide was empty"
     }
 
     /** Loads the cached guides into memory (at start, so now/next shows before any download). */
@@ -207,6 +227,12 @@ class IptvRepository(context: Context) {
         const val USER_AGENT = "VLC/3.0.24 LibVLC/3.0.24"
         private const val SOURCES = "sources.json"
         private const val FAVORITES = "favorites.json"
+
+        /** How long a downloaded guide is used before the automatic refresh fetches it again. */
+        const val GUIDE_MAX_AGE_MS = 12 * 60 * 60_000L
+
+        /** A manual refresh re-downloads guides older than this. */
+        const val GUIDE_MANUAL_MAX_AGE_MS = 60 * 60_000L
         private const val FAVORITE_GROUPS = "favorite_groups.json"
     }
 }
