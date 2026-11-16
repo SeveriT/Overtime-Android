@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.List
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.VideoLibrary
 import androidx.compose.material.icons.rounded.ViewTimeline
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.LiveTv
@@ -58,6 +59,7 @@ import dev.anilbeesetti.nextplayer.core.ui.components.NextTopAppBar
 import dev.anilbeesetti.nextplayer.core.ui.components.TopLevelFabKey
 import dev.anilbeesetti.nextplayer.core.ui.designsystem.NextIcons
 import dev.anilbeesetti.nextplayer.feature.iptv.model.Channel
+import dev.anilbeesetti.nextplayer.feature.iptv.model.SourceType
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -68,6 +70,7 @@ data class LiveTvActions(
     val editSource: (String) -> Unit,
     /** Plays [channel], with the channels shown alongside so the player's next/previous zaps. */
     val play: (channel: Channel, list: List<Channel>) -> Unit,
+    val openLibrary: () -> Unit,
 )
 
 @Composable
@@ -88,6 +91,11 @@ private fun LiveTvContent(state: LiveTvUiState, viewModel: LiveTvViewModel, acti
                 title = stringResource(R.string.live_tv),
                 fontWeight = FontWeight.Bold,
                 actions = {
+                    if (state.sources.any { it.type == SourceType.XTREAM }) {
+                        IconButton(onClick = actions.openLibrary) {
+                            Icon(Icons.Rounded.VideoLibrary, contentDescription = stringResource(R.string.library_title))
+                        }
+                    }
                     if (state.sources.isNotEmpty()) {
                         IconButton(onClick = viewModel::toggleGuide) {
                             Icon(

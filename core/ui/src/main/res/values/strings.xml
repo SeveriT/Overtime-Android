@@ -18,6 +18,17 @@
     <string name="app_name" translatable="false">Overtime</string>
     <string name="live_tv">Live TV</string>
     <string name="live_tv_refresh">Refresh channels and guide</string>
+    <string name="library_title">Movies &amp; series</string>
+    <string name="library_movies">Movies</string>
+    <string name="library_series">Series</string>
+    <string name="library_search_movies">Search all movies</string>
+    <string name="library_search_series">Search all series</string>
+    <string name="library_no_match">Nothing matches your search.</string>
+    <string name="library_empty_category">This category is empty.</string>
+    <string name="library_play">Play</string>
+    <string name="library_cast">Cast: %1$s</string>
+    <string name="library_director">Director: %1$s</string>
+    <string name="library_episode">Episode %1$d</string>
     <string name="live_tv_show_guide">Programme guide</string>
     <string name="live_tv_show_list">Channel list</string>
     <string name="live_tv_no_guide">No guide for this channel</string>

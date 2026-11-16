@@ -2,6 +2,12 @@ package dev.anilbeesetti.nextplayer.feature.iptv.data
 
 import android.content.Context
 import dev.anilbeesetti.nextplayer.feature.iptv.model.Channel
+import dev.anilbeesetti.nextplayer.feature.iptv.model.Episode
+import dev.anilbeesetti.nextplayer.feature.iptv.model.LibraryCategory
+import dev.anilbeesetti.nextplayer.feature.iptv.model.LibraryItem
+import dev.anilbeesetti.nextplayer.feature.iptv.model.LibraryKind
+import dev.anilbeesetti.nextplayer.feature.iptv.model.MovieDetails
+import dev.anilbeesetti.nextplayer.feature.iptv.model.SeriesDetails
 import dev.anilbeesetti.nextplayer.feature.iptv.model.EpgData
 import dev.anilbeesetti.nextplayer.feature.iptv.model.IptvSource
 import dev.anilbeesetti.nextplayer.feature.iptv.model.SourceType
@@ -80,6 +86,31 @@ class IptvRepository(context: Context) {
         _favorites.update { if (channelId in it) it - channelId else it + channelId }
         File(dir, FAVORITES).writeText(json.encodeToString(SetSerializer(String.serializer()), _favorites.value))
     }
+
+    // ---- movies & series (Xtream sources) -------------------------------------------
+
+    private val categoryCache = HashMap<Pair<String, LibraryKind>, List<LibraryCategory>>()
+    private val itemCache = HashMap<Triple<String, LibraryKind, String?>, List<LibraryItem>>()
+
+    /** Sources that have a movie & series library. */
+    val librarySources: List<IptvSource> get() = _sources.value.filter { it.type == SourceType.XTREAM }
+
+    suspend fun categories(source: IptvSource, kind: LibraryKind): List<LibraryCategory> = withContext(Dispatchers.IO) {
+        categoryCache.getOrPut(source.id to kind) { xtream.categories(source, kind) }
+    }
+
+    /** Titles of a category, or the whole library (for search) when [categoryId] is null. Kept for the session. */
+    suspend fun libraryItems(source: IptvSource, kind: LibraryKind, categoryId: String?): List<LibraryItem> = withContext(Dispatchers.IO) {
+        itemCache.getOrPut(Triple(source.id, kind, categoryId)) { xtream.items(source, kind, categoryId) }
+    }
+
+    suspend fun movieDetails(source: IptvSource, item: LibraryItem): MovieDetails = withContext(Dispatchers.IO) { xtream.movieDetails(source, item) }
+
+    suspend fun seriesDetails(source: IptvSource, item: LibraryItem): SeriesDetails = withContext(Dispatchers.IO) { xtream.seriesDetails(source, item) }
+
+    fun movieUrl(source: IptvSource, item: LibraryItem): String = xtream.movieUrl(source, item)
+
+    fun episodeUrl(source: IptvSource, episode: Episode): String = xtream.episodeUrl(source, episode)
 
     /** Downloads a source's channels (and the guides its playlist names); throws with a readable message on failure. */
     suspend fun refreshChannels(source: IptvSource): Unit = withContext(Dispatchers.IO) {
