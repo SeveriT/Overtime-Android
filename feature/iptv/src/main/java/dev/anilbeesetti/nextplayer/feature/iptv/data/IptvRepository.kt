@@ -52,6 +52,16 @@ class IptvRepository(context: Context) {
 
     fun newSourceId(): String = UUID.randomUUID().toString().take(8)
 
+    private var launchRefreshDone = false
+
+    /** True the first time it's asked in this app process: the moment to refresh everything once. */
+    @Synchronized
+    fun claimLaunchRefresh(): Boolean {
+        if (launchRefreshDone || _sources.value.isEmpty()) return false
+        launchRefreshDone = true
+        return true
+    }
+
     fun saveSource(source: IptvSource) {
         _sources.update { list -> if (list.any { it.id == source.id }) list.map { if (it.id == source.id) source else it } else list + source }
         writeList(SOURCES, ListSerializer(IptvSource.serializer()), _sources.value)

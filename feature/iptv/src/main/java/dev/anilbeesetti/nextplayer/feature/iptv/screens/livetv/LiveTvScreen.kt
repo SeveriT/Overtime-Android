@@ -43,11 +43,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import dev.anilbeesetti.nextplayer.core.ui.R
 import dev.anilbeesetti.nextplayer.core.ui.components.BindTopLevelFab
 import dev.anilbeesetti.nextplayer.core.ui.components.LocalNavigationBottomPadding
 import dev.anilbeesetti.nextplayer.core.ui.components.NextTopAppBar
@@ -81,17 +83,17 @@ private fun LiveTvContent(state: LiveTvUiState, viewModel: LiveTvViewModel, acti
     Scaffold(
         topBar = {
             NextTopAppBar(
-                title = "Live TV",
+                title = stringResource(R.string.live_tv),
                 fontWeight = FontWeight.Bold,
                 actions = {
                     state.sourceId?.let { id ->
                         IconButton(onClick = { actions.editSource(id) }) {
-                            Icon(Icons.Rounded.Edit, contentDescription = "Edit source")
+                            Icon(Icons.Rounded.Edit, contentDescription = stringResource(R.string.live_tv_edit_source))
                         }
                     }
                     if (state.sources.isNotEmpty()) {
-                        IconButton(onClick = viewModel::refreshAll, enabled = state.busy == null) {
-                            Icon(Icons.Rounded.Refresh, contentDescription = "Refresh channels and guide")
+                        IconButton(onClick = { viewModel.refreshAll() }, enabled = !state.busy) {
+                            Icon(Icons.Rounded.Refresh, contentDescription = stringResource(R.string.live_tv_refresh))
                         }
                     }
                 },
@@ -115,14 +117,25 @@ private fun LiveTvContent(state: LiveTvUiState, viewModel: LiveTvViewModel, acti
                 if (state.sources.size > 1) {
                     ChipRow(state.sources.map { it.id to it.name }, state.sourceId) { viewModel.selectSource(it) }
                 }
-                ChipRow(state.groups.map { it to it }, state.group.takeIf { state.query.isBlank() }) { viewModel.selectGroup(it) }
+                val allLabel = stringResource(R.string.live_tv_all_channels)
+                val favouritesLabel = stringResource(R.string.live_tv_favourites)
+                ChipRow(
+                    state.groups.map {
+                        it to when (it) {
+                            GROUP_ALL -> allLabel
+                            GROUP_FAVORITES -> "★ $favouritesLabel"
+                            else -> it
+                        }
+                    },
+                    state.group.takeIf { state.query.isBlank() },
+                ) { viewModel.selectGroup(it) }
                 OutlinedTextField(
                     value = state.query,
                     onValueChange = viewModel::search,
-                    placeholder = { Text("Search channels") },
+                    placeholder = { Text(stringResource(R.string.live_tv_search)) },
                     leadingIcon = { Icon(Icons.Rounded.Search, contentDescription = null) },
                     trailingIcon = if (state.query.isNotEmpty()) {
-                        { IconButton(onClick = { viewModel.search("") }) { Icon(Icons.Rounded.Close, contentDescription = "Clear search") } }
+                        { IconButton(onClick = { viewModel.search("") }) { Icon(Icons.Rounded.Close, contentDescription = stringResource(R.string.live_tv_clear_search)) } }
                     } else {
                         null
                     },
@@ -130,20 +143,27 @@ private fun LiveTvContent(state: LiveTvUiState, viewModel: LiveTvViewModel, acti
                     shape = RoundedCornerShape(28.dp),
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
                 )
-                (state.busy ?: state.error)?.let { status ->
+                state.status?.let { status ->
                     Text(
-                        status,
+                        when (status) {
+                            is LiveTvStatus.Loading -> when {
+                                status.quiet -> stringResource(R.string.live_tv_updating, status.source)
+                                status.guide -> stringResource(R.string.live_tv_loading_guide, status.source)
+                                else -> stringResource(R.string.live_tv_loading_channels, status.source)
+                            }
+                            is LiveTvStatus.Failed -> stringResource(R.string.live_tv_source_error, status.source, status.message)
+                        },
                         style = MaterialTheme.typography.labelMedium,
-                        color = if (state.error != null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = if (status is LiveTvStatus.Failed) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
                     )
                 }
                 if (state.channels.isEmpty()) {
                     Text(
                         when {
-                            state.query.isNotBlank() -> "No channels match “${state.query}”."
-                            state.group == GROUP_FAVORITES -> "No favourites yet. Star a channel to add it here."
-                            else -> "No channels here yet. Try refreshing."
+                            state.query.isNotBlank() -> stringResource(R.string.live_tv_no_match, state.query)
+                            state.group == GROUP_FAVORITES -> stringResource(R.string.live_tv_no_favourites)
+                            else -> stringResource(R.string.live_tv_no_channels)
                         },
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(24.dp),
@@ -229,7 +249,7 @@ private fun ChannelRow(
             }
             next?.let {
                 Text(
-                    "Next $it",
+                    stringResource(R.string.live_tv_next, it),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
@@ -241,7 +261,7 @@ private fun ChannelRow(
         IconButton(onClick = onToggleFavorite) {
             Icon(
                 if (favorite) Icons.Rounded.Star else Icons.Rounded.StarBorder,
-                contentDescription = if (favorite) "Remove from favourites" else "Add to favourites",
+                contentDescription = stringResource(if (favorite) R.string.live_tv_remove_favourite else R.string.live_tv_add_favourite),
                 tint = if (favorite) Color(0xFFFFC107) else MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
@@ -258,13 +278,13 @@ private fun EmptyState(onAdd: () -> Unit) {
         Box(Modifier.size(72.dp).clip(CircleShape).background(MaterialTheme.colorScheme.secondaryContainer), contentAlignment = Alignment.Center) {
             Icon(Icons.Rounded.LiveTv, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondaryContainer, modifier = Modifier.size(36.dp))
         }
-        Text("Live TV", style = MaterialTheme.typography.titleLarge)
+        Text(stringResource(R.string.live_tv), style = MaterialTheme.typography.titleLarge)
         Text(
-            "Add an M3U playlist or an Xtream Codes login to watch channels here.",
+            stringResource(R.string.live_tv_empty),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.bodyMedium,
         )
-        TextButton(onClick = onAdd) { Text("Add a source") }
+        TextButton(onClick = onAdd) { Text(stringResource(R.string.live_tv_add_a_source)) }
     }
 }
 

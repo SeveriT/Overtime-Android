@@ -17,10 +17,10 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
 
 /** The pseudo-group listing starred channels. */
-const val GROUP_FAVORITES = "★ Favourites"
+const val GROUP_FAVORITES = "\u0000favourites"
 
 /** The pseudo-group listing every channel of the source. */
-const val GROUP_ALL = "All channels"
+const val GROUP_ALL = "\u0000all"
 
 data class LiveTvUiState(
     val sources: List<IptvSource> = emptyList(),
@@ -33,14 +33,21 @@ data class LiveTvUiState(
     val favorites: Set<String> = emptySet(),
     val epg: EpgData = EpgData(),
     val now: Long = System.currentTimeMillis(),
-    val busy: String? = null,
-    val error: String? = null,
-)
+    val status: LiveTvStatus? = null,
+) {
+    val busy: Boolean get() = status is LiveTvStatus.Loading
+}
+
+/** What the screen says under the search box while sources load, or after one failed. */
+sealed interface LiveTvStatus {
+    data class Loading(val source: String, val guide: Boolean, val quiet: Boolean) : LiveTvStatus
+    data class Failed(val source: String, val message: String) : LiveTvStatus
+}
 
 @KoinViewModel
 class LiveTvViewModel(private val repository: IptvRepository) : ViewModel() {
     private val selection = MutableStateFlow(Selection())
-    private val status = MutableStateFlow<Pair<String?, String?>>(null to null)
+    private val status = MutableStateFlow<LiveTvStatus?>(null)
     private val clock = MutableStateFlow(System.currentTimeMillis())
 
     private data class Selection(val sourceId: String? = null, val group: String = GROUP_ALL, val query: String = "")
@@ -73,13 +80,16 @@ class LiveTvViewModel(private val repository: IptvRepository) : ViewModel() {
             favorites = favorites,
             epg = sourceId?.let(epg::get) ?: EpgData(),
             now = now,
-            busy = st.first,
-            error = st.second,
+            status = st,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), LiveTvUiState())
 
     init {
-        viewModelScope.launch { repository.loadCachedGuides() }
+        viewModelScope.launch {
+            repository.loadCachedGuides()
+            // Channels and guides go stale; reload them in the background once per launch.
+            if (repository.claimLaunchRefresh()) refreshAll(quiet = true)
+        }
         // Now/next and progress bars move on their own.
         viewModelScope.launch {
             while (true) {
@@ -103,20 +113,24 @@ class LiveTvViewModel(private val repository: IptvRepository) : ViewModel() {
 
     fun toggleFavorite(channel: Channel) = repository.toggleFavorite(channel.id)
 
-    /** Reloads channels and guides of every source. */
-    fun refreshAll() {
+    /**
+     * Reloads channels and guides of every source. [quiet] (the refresh at launch) says "Updating" and keeps
+     * a failure to itself while saved channels are still there to watch.
+     */
+    fun refreshAll(quiet: Boolean = false) {
         viewModelScope.launch {
             for (source in repository.sources.value) {
                 try {
-                    status.value = "Loading ${source.name}…" to null
+                    status.value = LiveTvStatus.Loading(source.name, guide = false, quiet = quiet)
                     repository.refreshChannels(source)
-                    status.value = "Loading the guide for ${source.name}…" to null
+                    status.value = LiveTvStatus.Loading(source.name, guide = true, quiet = quiet)
                     repository.refreshGuide(source)
-                    status.value = null to null
+                    status.value = null
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
-                    status.value = null to "${source.name}: ${e.message ?: e::class.simpleName}"
+                    val hasChannels = repository.channels.value[source.id].orEmpty().isNotEmpty()
+                    status.value = if (quiet && hasChannels) null else LiveTvStatus.Failed(source.name, e.message ?: e::class.simpleName.orEmpty())
                 }
             }
         }
