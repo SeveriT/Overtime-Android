@@ -100,10 +100,10 @@ import dev.anilbeesetti.nextplayer.core.ui.components.TopLevelFabState
 import dev.anilbeesetti.nextplayer.core.ui.components.thenIf
 import dev.anilbeesetti.nextplayer.core.ui.components.tvFocusRing
 import dev.anilbeesetti.nextplayer.core.ui.designsystem.NextIcons
+import dev.anilbeesetti.nextplayer.feature.iptv.navigation.ContinueWatchingRoute
 import dev.anilbeesetti.nextplayer.feature.iptv.navigation.LibraryRoute
 import dev.anilbeesetti.nextplayer.feature.iptv.navigation.LiveTvRoute
 import dev.anilbeesetti.nextplayer.feature.more.navigation.MoreRoute
-import dev.anilbeesetti.nextplayer.feature.network.navigation.NetworkRoute
 import dev.anilbeesetti.nextplayer.feature.videopicker.navigation.MediaPickerRoute
 
 /**
@@ -128,17 +128,16 @@ enum class TopLevelDestination(
         R.string.live_tv,
         TopLevelFabKey.LIVE_TV,
     ),
-    // Overtime: Movies & series takes Playlists' place (playlists open inside Home).
+    // Overtime: Movies & series and Continue watching; Network and Playlists open from More.
     LIBRARY(
         LibraryRoute,
         NextIcons.VideoLibrary,
         R.string.library_title,
     ),
-    NETWORK(
-        NetworkRoute,
-        NextIcons.Network,
-        R.string.network,
-        TopLevelFabKey.NETWORK,
+    CONTINUE(
+        ContinueWatchingRoute,
+        NextIcons.ContinueWatching,
+        R.string.continue_watching_nav,
     ),
     MORE(
         MoreRoute,

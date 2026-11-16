@@ -18,6 +18,7 @@ fun EntryProviderScope<NavKey>.networkNavGraph(context: Context, backStack: NavB
         onOpenConnection = { id -> backStack.navigateToNetworkBrowse(connectionId = id) },
         onSettingsClick = backStack::navigateToSettings,
         onOpenStream = { uri -> context.startPlayback(uri = uri) },
+        onNavigateUp = { backStack.removeLastIfNotRoot() },
     )
 
     addConnectionEntry(

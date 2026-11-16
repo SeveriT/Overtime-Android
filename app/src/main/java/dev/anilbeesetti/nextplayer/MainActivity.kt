@@ -81,6 +81,8 @@ import dev.anilbeesetti.nextplayer.navigation.navigationTransition
 import dev.anilbeesetti.nextplayer.navigation.navigationTransitionModifier
 import dev.anilbeesetti.nextplayer.navigation.libraryNavGraph
 import dev.anilbeesetti.nextplayer.navigation.liveTvNavGraph
+import dev.anilbeesetti.nextplayer.navigation.continueWatchingNavGraph
+import dev.anilbeesetti.nextplayer.feature.iptv.navigation.navigateToTitle
 import dev.anilbeesetti.nextplayer.navigation.networkNavGraph
 import dev.anilbeesetti.nextplayer.navigation.openPlaylist
 import dev.anilbeesetti.nextplayer.navigation.playlistNavGraph
@@ -169,9 +171,7 @@ class MainActivity : FragmentActivity() {
 
                     val mediaStack = navState.backStacks.getValue(TopLevelDestination.MEDIA.route)
                     val libraryStack = navState.backStacks.getValue(TopLevelDestination.LIBRARY.route)
-                    val networkStack = navState.backStacks.getValue(
-                        TopLevelDestination.NETWORK.route,
-                    )
+                    val continueStack = navState.backStacks.getValue(TopLevelDestination.CONTINUE.route)
                     val moreStack = navState.backStacks.getValue(TopLevelDestination.MORE.route)
                     val liveTvStack = navState.backStacks.getValue(TopLevelDestination.LIVE_TV.route)
 
@@ -186,7 +186,7 @@ class MainActivity : FragmentActivity() {
                         )
                         playlistNavGraph(
                             context = this@MainActivity,
-                            backStack = mediaStack,
+                            backStack = moreStack,
                         )
                         libraryNavGraph(
                             context = this@MainActivity,
@@ -194,7 +194,16 @@ class MainActivity : FragmentActivity() {
                         )
                         networkNavGraph(
                             context = this@MainActivity,
-                            backStack = networkStack,
+                            backStack = moreStack,
+                        )
+                        continueWatchingNavGraph(
+                            context = this@MainActivity,
+                            backStack = continueStack,
+                            openTitle = { sourceId, item ->
+                                // A finished series opens on its page in Movies & series.
+                                navState.switchTo(route = TopLevelDestination.LIBRARY.route)
+                                libraryStack.navigateToTitle(sourceId = sourceId, item = item)
+                            },
                         )
                         moreNavGraph(
                             context = this@MainActivity,

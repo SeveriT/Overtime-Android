@@ -62,36 +62,54 @@ import dev.anilbeesetti.nextplayer.core.ui.extensions.copy
 import dev.anilbeesetti.nextplayer.core.ui.theme.NextPlayerTheme
 
 @Composable
-fun NetworkScreen(viewModel: NetworkViewModel) {
+fun NetworkScreen(viewModel: NetworkViewModel, onNavigateUp: (() -> Unit)? = null) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     NetworkScreenContent(
         state = state,
         onAction = viewModel::onAction,
+        onNavigateUp = onNavigateUp,
     )
 }
 
 @Composable
-internal fun NetworkScreenContent(state: NetworkUiState, onAction: (NetworkAction) -> Unit) {
+internal fun NetworkScreenContent(state: NetworkUiState, onAction: (NetworkAction) -> Unit, onNavigateUp: (() -> Unit)? = null) {
     var connectionToDelete by remember { mutableStateOf<NetworkConnection?>(value = null) }
     var streamUrl by rememberSaveable { mutableStateOf(value = "") }
     val trimmedStreamUrl = streamUrl.trim()
     val fabUpFocusRequester = remember { FocusRequester() }
 
     val showEmptyState = state.connections.isEmpty() && !state.isLoading
-    BindTopLevelFab(
-        key = TopLevelFabKey.NETWORK,
-        icon = NextIcons.Add,
-        upFocusRequester = fabUpFocusRequester,
-        onClick = { onAction(NetworkAction.AddConnection) },
-    )
+    // Overtime: opened from More, so it has a back arrow and its own add button.
+    if (onNavigateUp == null) {
+        BindTopLevelFab(
+            key = TopLevelFabKey.NETWORK,
+            icon = NextIcons.Add,
+            upFocusRequester = fabUpFocusRequester,
+            onClick = { onAction(NetworkAction.AddConnection) },
+        )
+    }
     val navigationBottomPadding = LocalNavigationBottomPadding.current
 
     Scaffold(
+        floatingActionButton = {
+            if (onNavigateUp != null) {
+                androidx.compose.material3.FloatingActionButton(onClick = { onAction(NetworkAction.AddConnection) }) {
+                    Icon(imageVector = NextIcons.Add, contentDescription = null)
+                }
+            }
+        },
         topBar = {
             NextTopAppBar(
                 title = stringResource(R.string.network),
                 fontWeight = FontWeight.Bold,
+                navigationIcon = {
+                    if (onNavigateUp != null) {
+                        IconButton(onClick = onNavigateUp, modifier = Modifier.tvFocusRing()) {
+                            Icon(imageVector = NextIcons.ArrowBack, contentDescription = stringResource(R.string.navigate_up))
+                        }
+                    }
+                },
                 actions = {
                     IconButton(
                         onClick = {

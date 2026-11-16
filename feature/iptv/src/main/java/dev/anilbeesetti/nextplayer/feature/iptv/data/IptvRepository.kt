@@ -11,6 +11,7 @@ import dev.anilbeesetti.nextplayer.feature.iptv.model.SeriesDetails
 import dev.anilbeesetti.nextplayer.feature.iptv.model.EpgData
 import dev.anilbeesetti.nextplayer.feature.iptv.model.IptvSource
 import dev.anilbeesetti.nextplayer.feature.iptv.model.SourceType
+import dev.anilbeesetti.nextplayer.feature.iptv.model.WatchEntry
 import java.io.File
 import java.io.IOException
 import java.util.UUID
@@ -22,6 +23,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.SetSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
@@ -64,6 +66,37 @@ class IptvRepository(context: Context) {
         val key = "$sourceId|$group"
         _favoriteGroups.update { if (key in it) it - key else it + key }
         File(dir, FAVORITE_GROUPS).writeText(json.encodeToString(SetSerializer(String.serializer()), _favoriteGroups.value))
+    }
+
+    // ---- continue watching -----------------------------------------------------------
+
+    private val _watching = MutableStateFlow(readList(WATCHING, WatchEntry.serializer()))
+
+    /** Movies and episodes sent to the player, oldest first. */
+    val watching: StateFlow<List<WatchEntry>> = _watching.asStateFlow()
+
+    private val _dismissed = MutableStateFlow(
+        runCatching { json.decodeFromString(MapSerializer(String.serializer(), Long.serializer()), File(dir, DISMISSED).readText()) }.getOrDefault(emptyMap()),
+    )
+
+    /** Titles removed from Continue watching, and when: they come back once played again. */
+    val dismissed: StateFlow<Map<String, Long>> = _dismissed.asStateFlow()
+
+    /** Remembers what's being played: the picked item has a [WatchEntry.playedAt], queued ones keep theirs. */
+    @Synchronized
+    fun recordWatching(entries: List<WatchEntry>) {
+        if (entries.isEmpty()) return
+        val old = _watching.value.associateBy { it.url }
+        val updated = entries.map { entry -> old[entry.url]?.takeIf { entry.playedAt == 0L }?.let { entry.copy(playedAt = it.playedAt) } ?: entry }
+        val urls = updated.mapTo(HashSet()) { it.url }
+        val list = (_watching.value.filterNot { it.url in urls } + updated).takeLast(MAX_WATCHING)
+        _watching.value = list
+        writeList(WATCHING, ListSerializer(WatchEntry.serializer()), list)
+    }
+
+    fun dismissWatching(titleKey: String) {
+        _dismissed.update { it + (titleKey to System.currentTimeMillis()) }
+        File(dir, DISMISSED).writeText(json.encodeToString(MapSerializer(String.serializer(), Long.serializer()), _dismissed.value))
     }
 
     fun newSourceId(): String = UUID.randomUUID().toString().take(8)
@@ -234,5 +267,10 @@ class IptvRepository(context: Context) {
         /** A manual refresh re-downloads guides older than this. */
         const val GUIDE_MANUAL_MAX_AGE_MS = 60 * 60_000L
         private const val FAVORITE_GROUPS = "favorite_groups.json"
+        private const val WATCHING = "watching.json"
+        private const val DISMISSED = "watching_dismissed.json"
+
+        /** Remembered movies and episodes; the oldest are forgotten past this. */
+        private const val MAX_WATCHING = 3_000
     }
 }

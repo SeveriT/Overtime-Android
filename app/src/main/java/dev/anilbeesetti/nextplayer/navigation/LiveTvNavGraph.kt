@@ -9,6 +9,8 @@ import androidx.navigation3.runtime.NavKey
 import dev.anilbeesetti.nextplayer.feature.iptv.data.IptvRepository
 import dev.anilbeesetti.nextplayer.feature.iptv.model.Channel
 import dev.anilbeesetti.nextplayer.feature.iptv.navigation.addSourceEntry
+import dev.anilbeesetti.nextplayer.feature.iptv.navigation.continueWatchingEntry
+import dev.anilbeesetti.nextplayer.feature.iptv.model.LibraryItem
 import dev.anilbeesetti.nextplayer.feature.iptv.navigation.libraryEntry
 import dev.anilbeesetti.nextplayer.feature.iptv.navigation.navigateToTitle
 import dev.anilbeesetti.nextplayer.feature.iptv.navigation.titleEntry
@@ -49,6 +51,19 @@ fun EntryProviderScope<NavKey>.libraryNavGraph(context: Context, backStack: NavB
     titleEntry(
         onBack = { backStack.removeLastIfNotRoot() },
         onPlay = { items -> context.playQueue(items) },
+    )
+}
+
+/** The Continue watching tab: plays on, or opens a finished series' page via [openTitle]. */
+fun EntryProviderScope<NavKey>.continueWatchingNavGraph(
+    context: Context,
+    backStack: NavBackStack<NavKey>,
+    openTitle: (String, LibraryItem) -> Unit,
+) {
+    continueWatchingEntry(
+        onPlay = { items -> context.playQueue(items) },
+        onOpenTitle = openTitle,
+        onSettings = backStack::navigateToSettings,
     )
 }
 

@@ -42,6 +42,7 @@ fun EntryProviderScope<NavKey>.playlistNavGraph(
         } else {
             null
         },
+        onNavigateUp = { backStack.removeLastIfNotRoot() },
     )
 
     playlistDetailEntry(
@@ -55,9 +56,9 @@ fun EntryProviderScope<NavKey>.playlistNavGraph(
     )
 }
 
-/** A playlist shortcut: Overtime has no Playlists tab, so the playlist opens on top of Home. */
+/** A playlist shortcut: Overtime keeps Playlists under More, so the playlist opens there. */
 internal fun TopLevelNavState.openPlaylist(playlistId: Long) {
-    val homeRoute = TopLevelDestination.MEDIA.route
+    val homeRoute = TopLevelDestination.MORE.route
     val homeStack = backStacks.getValue(key = homeRoute)
     while (homeStack.size > 1) homeStack.removeLastOrNull()
     homeStack.add(element = PlaylistListRoute)

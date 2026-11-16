@@ -63,6 +63,7 @@ import dev.anilbeesetti.nextplayer.core.ui.extensions.copy
 fun PlaylistListScreen(
     viewModel: PlaylistListViewModel,
     onAddToHomeScreen: ((PlaylistSummary) -> Unit)? = null,
+    onNavigateUp: (() -> Unit)? = null,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -72,6 +73,7 @@ fun PlaylistListScreen(
         state = state,
         onAction = viewModel::onAction,
         onAddToHomeScreen = onAddToHomeScreen,
+        onNavigateUp = onNavigateUp,
     )
 }
 
@@ -80,24 +82,42 @@ internal fun PlaylistListScreenContent(
     state: PlaylistListUiState,
     onAction: (PlaylistUiAction) -> Unit = {},
     onAddToHomeScreen: ((PlaylistSummary) -> Unit)? = null,
+    onNavigateUp: (() -> Unit)? = null,
 ) {
     val openM3UFileLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
             uri?.let { onAction(PlaylistUiAction.CreateM3UFile(uri = it)) }
         }
-    BindTopLevelFab(
-        key = TopLevelFabKey.PLAYLISTS,
-        icon = NextIcons.Add,
-        onClick = { onAction(PlaylistUiAction.ShowCreationChooser) },
-    )
+    // Overtime: opened from More, so it has a back arrow and its own add button.
+    if (onNavigateUp == null) {
+        BindTopLevelFab(
+            key = TopLevelFabKey.PLAYLISTS,
+            icon = NextIcons.Add,
+            onClick = { onAction(PlaylistUiAction.ShowCreationChooser) },
+        )
+    }
 
     val navigationBottomPadding = LocalNavigationBottomPadding.current
 
     Scaffold(
+        floatingActionButton = {
+            if (onNavigateUp != null) {
+                androidx.compose.material3.FloatingActionButton(onClick = { onAction(PlaylistUiAction.ShowCreationChooser) }) {
+                    Icon(imageVector = NextIcons.Add, contentDescription = null)
+                }
+            }
+        },
         topBar = {
             NextTopAppBar(
                 title = stringResource(R.string.playlists),
                 fontWeight = FontWeight.Bold,
+                navigationIcon = {
+                    if (onNavigateUp != null) {
+                        IconButton(onClick = onNavigateUp, modifier = Modifier.tvFocusRing()) {
+                            Icon(imageVector = NextIcons.ArrowBack, contentDescription = stringResource(R.string.navigate_up))
+                        }
+                    }
+                },
                 actions = {
                     IconButton(
                         onClick = { onAction(PlaylistUiAction.OnSettingsClick) },

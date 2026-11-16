@@ -59,6 +59,14 @@
     <string name="iptv_edit_source">Edit source</string>
     <string name="iptv_sources">Sources</string>
     <string name="iptv_reorder">Drag to reorder</string>
+    <string name="continue_watching">Continue watching</string>
+    <string name="continue_watching_nav">Continue</string>
+    <string name="continue_watching_empty">Movies and episodes you start in Movies &amp; series show up here.</string>
+    <string name="continue_watching_left">%1$d min left</string>
+    <string name="continue_watching_next">Next: %1$s</string>
+    <string name="continue_watching_watched">Watched</string>
+    <string name="continue_watching_resume">Resume</string>
+    <string name="continue_watching_dismiss">Remove from Continue watching</string>
     <plurals name="iptv_channel_count">
         <item quantity="one">%1$d channel</item>
         <item quantity="other">%1$d channels</item>

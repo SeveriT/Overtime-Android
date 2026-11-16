@@ -5,6 +5,8 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import dev.anilbeesetti.nextplayer.feature.iptv.model.LibraryItem
 import dev.anilbeesetti.nextplayer.feature.iptv.screens.addsource.AddSourceScreen
+import dev.anilbeesetti.nextplayer.feature.iptv.screens.continuewatching.ContinueWatchingScreen
+import dev.anilbeesetti.nextplayer.feature.iptv.screens.continuewatching.ContinueWatchingViewModel
 import dev.anilbeesetti.nextplayer.feature.iptv.screens.library.LibraryScreen
 import dev.anilbeesetti.nextplayer.feature.iptv.screens.library.LibraryViewModel
 import dev.anilbeesetti.nextplayer.feature.iptv.screens.library.PlayableItem
@@ -31,6 +33,24 @@ object LibraryRoute : NavKey
 
 @Serializable
 object SourcesRoute : NavKey
+
+@Serializable
+object ContinueWatchingRoute : NavKey
+
+fun EntryProviderScope<NavKey>.continueWatchingEntry(
+    onPlay: (List<PlayableItem>) -> Unit,
+    onOpenTitle: (String, LibraryItem) -> Unit,
+    onSettings: () -> Unit,
+) {
+    entry<ContinueWatchingRoute> {
+        ContinueWatchingScreen(
+            viewModel = koinViewModel<ContinueWatchingViewModel>(),
+            onPlay = onPlay,
+            onOpenTitle = onOpenTitle,
+            onSettings = onSettings,
+        )
+    }
+}
 
 fun NavBackStack<NavKey>.navigateToSources() {
     add(element = SourcesRoute)

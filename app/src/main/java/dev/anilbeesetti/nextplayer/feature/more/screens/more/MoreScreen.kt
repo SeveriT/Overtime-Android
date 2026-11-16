@@ -125,6 +125,31 @@ internal fun MoreScreenContent(state: MoreUiState, onAction: (MoreAction) -> Uni
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     maxItemsInEachRow = 2,
                 ) {
+                    // Overtime: Network and Playlists live here instead of the navigation bar.
+                    FilledTonalButton(
+                        modifier = Modifier.weight(weight = 1f).tvFocusRing(),
+                        onClick = { onAction(MoreAction.OpenNetwork) },
+                    ) {
+                        Icon(
+                            imageVector = NextIcons.Network,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp),
+                        )
+                        Spacer(modifier = Modifier.size(8.dp))
+                        Text(text = stringResource(R.string.network))
+                    }
+                    FilledTonalButton(
+                        modifier = Modifier.weight(weight = 1f).tvFocusRing(),
+                        onClick = { onAction(MoreAction.OpenPlaylists) },
+                    ) {
+                        Icon(
+                            imageVector = NextIcons.Playlist,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp),
+                        )
+                        Spacer(modifier = Modifier.size(8.dp))
+                        Text(text = stringResource(R.string.playlists))
+                    }
                     FilledTonalButton(
                         modifier = Modifier.weight(weight = 1f).tvFocusRing(),
                         onClick = { onAction(MoreAction.OpenVault) },

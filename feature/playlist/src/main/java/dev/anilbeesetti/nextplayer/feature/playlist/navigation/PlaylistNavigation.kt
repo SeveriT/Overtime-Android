@@ -28,6 +28,7 @@ fun EntryProviderScope<NavKey>.playlistListEntry(
     onPlaylistClick: (Long) -> Unit,
     onSettingsClick: () -> Unit,
     onAddToHomeScreen: ((PlaylistSummary) -> Unit)? = null,
+    onNavigateUp: (() -> Unit)? = null,
 ) {
     entry<PlaylistListRoute> {
         val output = PlaylistListViewModel.Output(
@@ -41,6 +42,7 @@ fun EntryProviderScope<NavKey>.playlistListEntry(
         PlaylistListScreen(
             viewModel = viewModel,
             onAddToHomeScreen = onAddToHomeScreen,
+            onNavigateUp = onNavigateUp,
         )
     }
 }

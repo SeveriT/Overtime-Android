@@ -51,6 +51,7 @@ fun EntryProviderScope<NavKey>.networkEntry(
     onOpenConnection: (connectionId: Long) -> Unit,
     onSettingsClick: () -> Unit,
     onOpenStream: (Uri) -> Unit,
+    onNavigateUp: (() -> Unit)? = null,
 ) {
     entry<NetworkRoute> {
         val output = NetworkViewModel.Output(
@@ -64,7 +65,7 @@ fun EntryProviderScope<NavKey>.networkEntry(
             parameters = { parametersOf(output) },
         )
         SideEffect { viewModel.output = output }
-        NetworkScreen(viewModel = viewModel)
+        NetworkScreen(viewModel = viewModel, onNavigateUp = onNavigateUp)
     }
 }
 

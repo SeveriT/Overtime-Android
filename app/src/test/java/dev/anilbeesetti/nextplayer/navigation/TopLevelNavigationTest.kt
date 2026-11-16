@@ -5,19 +5,33 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import dev.anilbeesetti.nextplayer.feature.playlist.navigation.PlaylistDetailRoute
+import dev.anilbeesetti.nextplayer.feature.playlist.navigation.PlaylistListRoute
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class TopLevelNavigationTest {
 
+    private fun newState(): Pair<TopLevelNavState, Map<NavKey, NavBackStack<NavKey>>> {
+        val stacks = TopLevelDestination.entries.associate { destination ->
+            destination.route to NavBackStack<NavKey>(destination.route)
+        }
+        val state = TopLevelNavState(
+            destinations = TopLevelDestination.entries,
+            backStacks = stacks,
+            selectedIndexState = mutableIntStateOf(value = TopLevelDestination.entries.indexOf(TopLevelDestination.START)),
+        )
+        return state to stacks
+    }
+
     @Test
     fun topLevelDestinationsAreInOrder() {
         assertEquals(
             listOf(
                 TopLevelDestination.MEDIA,
-                TopLevelDestination.PLAYLISTS,
-                TopLevelDestination.NETWORK,
+                TopLevelDestination.LIVE_TV,
+                TopLevelDestination.LIBRARY,
+                TopLevelDestination.CONTINUE,
                 TopLevelDestination.MORE,
             ),
             TopLevelDestination.entries,
@@ -25,82 +39,33 @@ class TopLevelNavigationTest {
     }
 
     @Test
-    fun switchingTabsPreservesPlaylistDetailStack() {
-        val stacks = TopLevelDestination.entries.associate { destination ->
-            destination.route to NavBackStack<NavKey>(destination.route)
-        }
-        val state = TopLevelNavState(
-            destinations = TopLevelDestination.entries,
-            backStacks = stacks,
-            selectedIndexState = mutableIntStateOf(value = 0),
-        )
-        val playlistStack = stacks.getValue(TopLevelDestination.PLAYLISTS.route)
-
-        state.switchTo(TopLevelDestination.PLAYLISTS.route)
-        playlistStack += PlaylistDetailRoute(playlistId = 7)
-        state.switchTo(TopLevelDestination.MEDIA.route)
-        state.switchTo(TopLevelDestination.PLAYLISTS.route)
-
-        assertEquals(
-            listOf(
-                TopLevelDestination.PLAYLISTS.route,
-                PlaylistDetailRoute(playlistId = 7),
-            ),
-            state.currentStack,
-        )
-    }
-
-    @Test
-    fun shortcutSelectsPlaylistAndReplacesPreviousPlaylistStack() {
-        val stacks = TopLevelDestination.entries.associate { destination ->
-            destination.route to NavBackStack<NavKey>(destination.route)
-        }
-        val state = TopLevelNavState(
-            destinations = TopLevelDestination.entries,
-            backStacks = stacks,
-            selectedIndexState = mutableIntStateOf(value = 0),
-        )
-        stacks.getValue(
-            TopLevelDestination.PLAYLISTS.route,
-        ).add(element = PlaylistDetailRoute(playlistId = 7))
-        state.switchTo(TopLevelDestination.NETWORK.route)
+    fun playlistShortcutOpensUnderMore() {
+        val (state, stacks) = newState()
+        stacks.getValue(TopLevelDestination.MORE.route).add(element = PlaylistDetailRoute(playlistId = 7))
+        state.switchTo(TopLevelDestination.LIBRARY.route)
 
         state.openPlaylist(playlistId = 42)
         state.openPlaylist(playlistId = 42)
 
-        assertEquals(
-            TopLevelDestination.PLAYLISTS.route,
-            state.topLevelRoute,
-        )
+        assertEquals(TopLevelDestination.MORE.route, state.topLevelRoute)
         assertEquals(
             listOf(
-                TopLevelDestination.PLAYLISTS.route,
+                TopLevelDestination.MORE.route,
+                PlaylistListRoute,
                 PlaylistDetailRoute(playlistId = 42),
             ),
-            state.currentStack,
+            state.currentStack.toList(),
         )
         state.goBack()
-        assertEquals(
-            listOf(TopLevelDestination.PLAYLISTS.route),
-            state.currentStack,
-        )
         state.goBack()
-        assertEquals(
-            TopLevelDestination.MEDIA.route,
-            state.topLevelRoute,
-        )
+        assertEquals(listOf(TopLevelDestination.MORE.route), state.currentStack.toList())
+        state.goBack()
+        assertEquals(TopLevelDestination.START.route, state.topLevelRoute)
     }
 
     @Test
     fun topLevelContentKeysContainsDestinations() {
-        val stacks = TopLevelDestination.entries.associate { destination ->
-            destination.route to NavBackStack<NavKey>(destination.route)
-        }
-        val state = TopLevelNavState(
-            destinations = TopLevelDestination.entries,
-            backStacks = stacks,
-            selectedIndexState = mutableIntStateOf(value = 0),
-        )
+        val (state, _) = newState()
         val provider = entryProvider<NavKey> {
             TopLevelDestination.entries.forEach { destination ->
                 entry(key = destination.route) {}

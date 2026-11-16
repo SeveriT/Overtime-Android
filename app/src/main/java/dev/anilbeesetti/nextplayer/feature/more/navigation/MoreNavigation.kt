@@ -29,6 +29,8 @@ fun EntryProviderScope<NavKey>.moreEntry(
     onSettingsClick: () -> Unit,
     onTrashClick: () -> Unit,
     onVaultClick: () -> Unit,
+    onNetworkClick: () -> Unit,
+    onPlaylistsClick: () -> Unit,
 ) {
     entry<MoreRoute> {
         val output = MoreViewModel.Output(
@@ -37,6 +39,8 @@ fun EntryProviderScope<NavKey>.moreEntry(
             openSettings = onSettingsClick,
             openTrash = onTrashClick,
             openVault = onVaultClick,
+            openNetwork = onNetworkClick,
+            openPlaylists = onPlaylistsClick,
         )
         val viewModel = koinViewModel<MoreViewModel>(
             parameters = { parametersOf(output) },

@@ -10,6 +10,7 @@ import dev.anilbeesetti.nextplayer.feature.iptv.model.LibraryItem
 import dev.anilbeesetti.nextplayer.feature.iptv.model.LibraryKind
 import dev.anilbeesetti.nextplayer.feature.iptv.model.MovieDetails
 import dev.anilbeesetti.nextplayer.feature.iptv.model.SeriesDetails
+import dev.anilbeesetti.nextplayer.feature.iptv.model.WatchEntry
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -165,14 +166,37 @@ class TitleDetailsViewModel(
 
     fun selectSeason(index: Int) = _state.update { it.copy(seasonIndex = index) }
 
-    fun movie(): PlayableItem? = source?.let { PlayableItem(repository.movieUrl(it, item), item.name) }
+    fun movie(): PlayableItem? {
+        val source = source ?: return null
+        val url = repository.movieUrl(source, item)
+        val image = _state.value.movie?.backdrop ?: item.backdrop ?: item.poster
+        repository.recordWatching(listOf(WatchEntry(url, source.id, item, item.name, image, playedAt = System.currentTimeMillis())))
+        return PlayableItem(url, item.name)
+    }
 
-    /** [episode] and the rest of its season after it, so the player's next button (and autoplay) goes on. */
+    /**
+     * [episode] and the rest of its season after it, so the player's next button (and autoplay) goes on.
+     * All of them are remembered for Continue watching, which can then offer the next episode.
+     */
     fun episodesFrom(episode: Episode): List<PlayableItem> {
         val source = source ?: return emptyList()
-        val season = _state.value.series?.seasons?.firstOrNull { s -> s.episodes.any { it.id == episode.id } } ?: return emptyList()
-        return season.episodes.dropWhile { it.id != episode.id }.map {
-            PlayableItem(repository.episodeUrl(source, it), "${item.name} · S${season.number} E${it.number}" + it.title.takeIf { t -> t.isNotBlank() }?.let { t -> " · $t" }.orEmpty())
+        val series = _state.value.series
+        val season = series?.seasons?.firstOrNull { s -> s.episodes.any { it.id == episode.id } } ?: return emptyList()
+        val now = System.currentTimeMillis()
+        val entries = season.episodes.dropWhile { it.id != episode.id }.map {
+            WatchEntry(
+                url = repository.episodeUrl(source, it),
+                sourceId = source.id,
+                item = item,
+                title = "${item.name} · S${season.number} E${it.number}" + it.title.takeIf { t -> t.isNotBlank() }?.let { t -> " · $t" }.orEmpty(),
+                image = it.image ?: series.backdrop ?: item.backdrop ?: item.poster,
+                season = season.number,
+                episode = it.number,
+                episodeTitle = it.title.takeIf { t -> t.isNotBlank() },
+                playedAt = if (it.id == episode.id) now else 0L,
+            )
         }
+        repository.recordWatching(entries)
+        return entries.map { PlayableItem(it.url, it.title) }
     }
 }
