@@ -19,7 +19,9 @@ class TopLevelNavigationTest {
         val state = TopLevelNavState(
             destinations = TopLevelDestination.entries,
             backStacks = stacks,
-            selectedIndexState = mutableIntStateOf(value = TopLevelDestination.entries.indexOf(TopLevelDestination.START)),
+            selectedIndexState = mutableIntStateOf(
+                value = TopLevelDestination.entries.indexOf(TopLevelDestination.START),
+            ),
         )
         return state to stacks
     }
@@ -41,13 +43,18 @@ class TopLevelNavigationTest {
     @Test
     fun playlistShortcutOpensUnderMore() {
         val (state, stacks) = newState()
-        stacks.getValue(TopLevelDestination.MORE.route).add(element = PlaylistDetailRoute(playlistId = 7))
+        stacks.getValue(
+            TopLevelDestination.MORE.route,
+        ).add(element = PlaylistDetailRoute(playlistId = 7))
         state.switchTo(TopLevelDestination.LIBRARY.route)
 
         state.openPlaylist(playlistId = 42)
         state.openPlaylist(playlistId = 42)
 
-        assertEquals(TopLevelDestination.MORE.route, state.topLevelRoute)
+        assertEquals(
+            TopLevelDestination.MORE.route,
+            state.topLevelRoute,
+        )
         assertEquals(
             listOf(
                 TopLevelDestination.MORE.route,
@@ -58,9 +65,15 @@ class TopLevelNavigationTest {
         )
         state.goBack()
         state.goBack()
-        assertEquals(listOf(TopLevelDestination.MORE.route), state.currentStack.toList())
+        assertEquals(
+            listOf(TopLevelDestination.MORE.route),
+            state.currentStack.toList(),
+        )
         state.goBack()
-        assertEquals(TopLevelDestination.START.route, state.topLevelRoute)
+        assertEquals(
+            TopLevelDestination.START.route,
+            state.topLevelRoute,
+        )
     }
 
     @Test

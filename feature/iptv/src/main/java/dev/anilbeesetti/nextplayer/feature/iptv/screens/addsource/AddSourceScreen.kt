@@ -46,9 +46,16 @@ fun AddSourceScreen(viewModel: AddSourceViewModel, onDone: () -> Unit) {
     Scaffold(
         topBar = {
             NextTopAppBar(
-                title = stringResource(if (state.editing) R.string.iptv_edit_source else R.string.live_tv_add_source),
+                title = stringResource(
+                    if (state.editing) R.string.iptv_edit_source else R.string.live_tv_add_source,
+                ),
                 navigationIcon = {
-                    IconButton(onClick = onDone) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.navigate_up)) }
+                    IconButton(onClick = onDone) {
+                        Icon(
+                            Icons.AutoMirrored.Rounded.ArrowBack,
+                            contentDescription = stringResource(R.string.navigate_up),
+                        )
+                    }
                 },
             )
         },
@@ -63,11 +70,20 @@ fun AddSourceScreen(viewModel: AddSourceViewModel, onDone: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-                listOf(SourceType.M3U_URL to R.string.iptv_m3u, SourceType.XTREAM to R.string.iptv_xtream).forEachIndexed { index, (type, label) ->
+                listOf(
+                    SourceType.M3U_URL to R.string.iptv_m3u,
+                    SourceType.XTREAM to R.string.iptv_xtream,
+                ).forEachIndexed {
+                        index,
+                        (type, label),
+                    ->
                     SegmentedButton(
                         selected = state.type == type,
                         onClick = { viewModel.update { it.copy(type = type) } },
-                        shape = SegmentedButtonDefaults.itemShape(index, 2),
+                        shape = SegmentedButtonDefaults.itemShape(
+                            index,
+                            2,
+                        ),
                     ) { Text(stringResource(label)) }
                 }
             }
@@ -81,8 +97,30 @@ fun AddSourceScreen(viewModel: AddSourceViewModel, onDone: () -> Unit) {
             OutlinedTextField(
                 value = state.url,
                 onValueChange = { v -> viewModel.update { it.copy(url = v) } },
-                label = { Text(stringResource(if (state.type == SourceType.XTREAM) R.string.iptv_server_address else R.string.iptv_playlist_url)) },
-                placeholder = { Text(if (state.type == SourceType.XTREAM) "http://example.com:8080" else "https://…/playlist.m3u") },
+                label = {
+                    Text(
+                        stringResource(
+                            if (state.type ==
+                                SourceType.XTREAM
+                            ) {
+                                R.string.iptv_server_address
+                            } else {
+                                R.string.iptv_playlist_url
+                            },
+                        ),
+                    )
+                },
+                placeholder = {
+                    Text(
+                        if (state.type ==
+                            SourceType.XTREAM
+                        ) {
+                            "http://example.com:8080"
+                        } else {
+                            "https://…/playlist.m3u"
+                        },
+                    )
+                },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
                 modifier = Modifier.fillMaxWidth(),
@@ -110,20 +148,58 @@ fun AddSourceScreen(viewModel: AddSourceViewModel, onDone: () -> Unit) {
                 onValueChange = { v -> viewModel.update { it.copy(epgUrl = v) } },
                 label = { Text(stringResource(R.string.iptv_guide_url)) },
                 supportingText = {
-                    Text(stringResource(if (state.type == SourceType.XTREAM) R.string.iptv_guide_hint_xtream else R.string.iptv_guide_hint_m3u))
+                    Text(
+                        stringResource(
+                            if (state.type ==
+                                SourceType.XTREAM
+                            ) {
+                                R.string.iptv_guide_hint_xtream
+                            } else {
+                                R.string.iptv_guide_hint_m3u
+                            },
+                        ),
+                    )
                 },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
                 modifier = Modifier.fillMaxWidth(),
             )
-            state.error?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium) }
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End), verticalAlignment = Alignment.CenterVertically) {
+            state.error?.let {
+                Text(
+                    it,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(
+                    8.dp,
+                    Alignment.End,
+                ),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
                 if (state.editing) {
-                    TextButton(onClick = { viewModel.delete(onDone) }) { Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error) }
+                    TextButton(onClick = {
+                        viewModel.delete(onDone)
+                    }) {
+                        Text(
+                            stringResource(R.string.delete),
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    }
                 }
                 if (state.saving) CircularProgressIndicator(Modifier.padding(end = 8.dp))
-                Button(onClick = { viewModel.save(onDone) }, enabled = state.canSave && !state.saving) {
-                    Text(stringResource(if (state.saving) R.string.iptv_loading_channels else R.string.save))
+                Button(
+                    onClick = { viewModel.save(onDone) },
+                    enabled =
+                        state.canSave && !state.saving,
+                ) {
+                    Text(
+                        stringResource(
+                            if (state.saving) R.string.iptv_loading_channels else R.string.save,
+                        ),
+                    )
                 }
             }
         }

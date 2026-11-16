@@ -61,13 +61,21 @@ data class EpgData(
         if (other.isEmpty) return this
         val merged = HashMap(programmes)
         other.programmes.forEach { (id, list) ->
-            merged[id] = merged[id]?.let { mine -> (mine + list).distinctBy { it.start }.sortedBy { it.start } } ?: list
+            merged[id] =
+                merged[id]?.let { mine ->
+                    (mine + list).distinctBy { it.start }.sortedBy { it.start }
+                }
+                    ?: list
         }
-        return EpgData(nameToId = other.nameToId + nameToId, programmes = merged)
+        return EpgData(
+            nameToId = other.nameToId + nameToId,
+            programmes = merged,
+        )
     }
 
     /** Every programme the guide has for [channel], by start time. */
-    fun programmesFor(channel: Channel): List<Programme> = resolveId(channel)?.let(programmes::get).orEmpty()
+    fun programmesFor(channel: Channel): List<Programme> =
+        resolveId(channel)?.let(programmes::get).orEmpty()
 
     /** What's on [channel] at [now] and what follows. */
     fun nowNext(channel: Channel, now: Long): Pair<Programme?, Programme?> {

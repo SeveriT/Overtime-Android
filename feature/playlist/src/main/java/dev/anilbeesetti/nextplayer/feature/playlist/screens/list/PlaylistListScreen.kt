@@ -102,8 +102,13 @@ internal fun PlaylistListScreenContent(
     Scaffold(
         floatingActionButton = {
             if (onNavigateUp != null) {
-                androidx.compose.material3.FloatingActionButton(onClick = { onAction(PlaylistUiAction.ShowCreationChooser) }) {
-                    Icon(imageVector = NextIcons.Add, contentDescription = null)
+                androidx.compose.material3.FloatingActionButton(onClick = {
+                    onAction(PlaylistUiAction.ShowCreationChooser)
+                }) {
+                    Icon(
+                        imageVector = NextIcons.Add,
+                        contentDescription = null,
+                    )
                 }
             }
         },
@@ -113,8 +118,14 @@ internal fun PlaylistListScreenContent(
                 fontWeight = FontWeight.Bold,
                 navigationIcon = {
                     if (onNavigateUp != null) {
-                        IconButton(onClick = onNavigateUp, modifier = Modifier.tvFocusRing()) {
-                            Icon(imageVector = NextIcons.ArrowBack, contentDescription = stringResource(R.string.navigate_up))
+                        IconButton(
+                            onClick = onNavigateUp,
+                            modifier = Modifier.tvFocusRing(),
+                        ) {
+                            Icon(
+                                imageVector = NextIcons.ArrowBack,
+                                contentDescription = stringResource(R.string.navigate_up),
+                            )
                         }
                     }
                 },

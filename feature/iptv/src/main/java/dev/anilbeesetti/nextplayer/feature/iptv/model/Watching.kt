@@ -66,7 +66,10 @@ fun continueWatching(
     dismissed: Map<String, Long>,
     states: Map<String, PlaybackProgress>,
 ): List<ContinueItem> {
-    fun recency(entry: WatchEntry) = maxOf(states[entry.url]?.lastPlayed ?: 0L, entry.playedAt)
+    fun recency(entry: WatchEntry) = maxOf(
+        states[entry.url]?.lastPlayed ?: 0L,
+        entry.playedAt,
+    )
 
     return watching
         .filter { recency(it) > 0 }
@@ -80,25 +83,71 @@ fun continueWatching(
             val duration = state?.duration?.takeIf { it > 0 }
             val finished = position < 0 || (duration != null && position >= duration * FINISHED_AT)
             val started = position >= STARTED_MS
-            val progress = if (duration != null && position > 0) (position.toFloat() / duration).coerceIn(0f, 1f) else 0f
+            val progress = if (duration != null &&
+                position > 0
+            ) {
+                (position.toFloat() / duration).coerceIn(
+                    0f,
+                    1f,
+                )
+            } else {
+                0f
+            }
             val remaining = if (duration != null && position > 0) duration - position else null
 
             if (!latest.isEpisode) {
                 if (finished || !started) return@mapNotNull null
-                return@mapNotNull ContinueItem(key, latest, ContinueKind.RESUME, progress, remaining, listOf(latest), at)
+                return@mapNotNull ContinueItem(
+                    key,
+                    latest,
+                    ContinueKind.RESUME,
+                    progress,
+                    remaining,
+                    listOf(latest),
+                    at,
+                )
             }
 
             // Every episode of the series ever queued, in order.
             val all = watching.filter { it.titleKey == key }.sortedBy { it.order }
-            fun seasonFrom(first: WatchEntry) = all.filter { it.season == first.season && it.order >= first.order }
+            fun seasonFrom(first: WatchEntry) = all.filter {
+                it.season == first.season &&
+                    it.order >= first.order
+            }
             if (!finished) {
-                ContinueItem(key, latest, ContinueKind.RESUME, if (started) progress else 0f, remaining.takeIf { started }, seasonFrom(latest), at)
+                ContinueItem(
+                    key,
+                    latest,
+                    ContinueKind.RESUME,
+                    if (started) progress else 0f,
+                    remaining.takeIf {
+                        started
+                    },
+                    seasonFrom(latest),
+                    at,
+                )
             } else {
                 val next = all.firstOrNull { it.order > latest.order }
                 if (next != null) {
-                    ContinueItem(key, next, ContinueKind.NEXT, 0f, null, seasonFrom(next), at)
+                    ContinueItem(
+                        key,
+                        next,
+                        ContinueKind.NEXT,
+                        0f,
+                        null,
+                        seasonFrom(next),
+                        at,
+                    )
                 } else {
-                    ContinueItem(key, latest, ContinueKind.WATCHED, 1f, null, emptyList(), at)
+                    ContinueItem(
+                        key,
+                        latest,
+                        ContinueKind.WATCHED,
+                        1f,
+                        null,
+                        emptyList(),
+                        at,
+                    )
                 }
             }
         }

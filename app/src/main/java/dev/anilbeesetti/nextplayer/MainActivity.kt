@@ -71,18 +71,18 @@ import dev.anilbeesetti.nextplayer.core.ui.components.LocalTopLevelFabSetter
 import dev.anilbeesetti.nextplayer.core.ui.components.TopLevelFabState
 import dev.anilbeesetti.nextplayer.core.ui.components.thenIf
 import dev.anilbeesetti.nextplayer.core.ui.theme.NextPlayerTheme
+import dev.anilbeesetti.nextplayer.feature.iptv.navigation.navigateToTitle
 import dev.anilbeesetti.nextplayer.navigation.NextNavigationBar
 import dev.anilbeesetti.nextplayer.navigation.NextNavigationRail
 import dev.anilbeesetti.nextplayer.navigation.TopLevelDestination
 import dev.anilbeesetti.nextplayer.navigation.TopLevelNavState
+import dev.anilbeesetti.nextplayer.navigation.continueWatchingNavGraph
+import dev.anilbeesetti.nextplayer.navigation.libraryNavGraph
+import dev.anilbeesetti.nextplayer.navigation.liveTvNavGraph
 import dev.anilbeesetti.nextplayer.navigation.mediaNavGraph
 import dev.anilbeesetti.nextplayer.navigation.moreNavGraph
 import dev.anilbeesetti.nextplayer.navigation.navigationTransition
 import dev.anilbeesetti.nextplayer.navigation.navigationTransitionModifier
-import dev.anilbeesetti.nextplayer.navigation.libraryNavGraph
-import dev.anilbeesetti.nextplayer.navigation.liveTvNavGraph
-import dev.anilbeesetti.nextplayer.navigation.continueWatchingNavGraph
-import dev.anilbeesetti.nextplayer.feature.iptv.navigation.navigateToTitle
 import dev.anilbeesetti.nextplayer.navigation.networkNavGraph
 import dev.anilbeesetti.nextplayer.navigation.openPlaylist
 import dev.anilbeesetti.nextplayer.navigation.playlistNavGraph
@@ -170,10 +170,16 @@ class MainActivity : FragmentActivity() {
                     }
 
                     val mediaStack = navState.backStacks.getValue(TopLevelDestination.MEDIA.route)
-                    val libraryStack = navState.backStacks.getValue(TopLevelDestination.LIBRARY.route)
-                    val continueStack = navState.backStacks.getValue(TopLevelDestination.CONTINUE.route)
+                    val libraryStack = navState.backStacks.getValue(
+                        TopLevelDestination.LIBRARY.route,
+                    )
+                    val continueStack = navState.backStacks.getValue(
+                        TopLevelDestination.CONTINUE.route,
+                    )
                     val moreStack = navState.backStacks.getValue(TopLevelDestination.MORE.route)
-                    val liveTvStack = navState.backStacks.getValue(TopLevelDestination.LIVE_TV.route)
+                    val liveTvStack = navState.backStacks.getValue(
+                        TopLevelDestination.LIVE_TV.route,
+                    )
 
                     val provider = entryProvider {
                         liveTvNavGraph(
@@ -202,7 +208,10 @@ class MainActivity : FragmentActivity() {
                             openTitle = { sourceId, item ->
                                 // A finished series opens on its page in Movies & series.
                                 navState.switchTo(route = TopLevelDestination.LIBRARY.route)
-                                libraryStack.navigateToTitle(sourceId = sourceId, item = item)
+                                libraryStack.navigateToTitle(
+                                    sourceId = sourceId,
+                                    item = item,
+                                )
                             },
                         )
                         moreNavGraph(

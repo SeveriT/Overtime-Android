@@ -56,23 +56,55 @@ class LiveTvViewModel(private val repository: IptvRepository) : ViewModel() {
     private val status = MutableStateFlow<LiveTvStatus?>(null)
     private val clock = MutableStateFlow(System.currentTimeMillis())
 
-    private data class Selection(val sourceId: String? = null, val group: String? = null, val query: String = "", val guide: Boolean = false)
+    private data class Selection(
+        val sourceId: String? = null,
+        val group: String? = null,
+        val query: String = "",
+        val guide: Boolean = false,
+    )
 
     val state: StateFlow<LiveTvUiState> = combine(
         repository.sources,
         repository.channels,
-        combine(repository.favorites, repository.favoriteGroups) { f, g -> f to g },
+        combine(
+            repository.favorites,
+            repository.favoriteGroups,
+        ) { f, g -> f to g },
         repository.epg,
-        combine(selection, status, clock) { s, st, c -> Triple(s, st, c) },
+        combine(
+            selection,
+            status,
+            clock,
+        ) { s, st, c ->
+            Triple(
+                s,
+                st,
+                c,
+            )
+        },
     ) { sources, channelsBySource, (favorites, favoriteGroups), epg, (sel, st, now) ->
-        val sourceId = sel.sourceId?.takeIf { id -> sources.any { it.id == id } } ?: sources.firstOrNull()?.id
+        val sourceId =
+            sel.sourceId?.takeIf { id -> sources.any { it.id == id } } ?: sources.firstOrNull()?.id
         val all = sourceId?.let(channelsBySource::get).orEmpty()
         val counts = LinkedHashMap<String, Int>()
         all.forEach { counts[it.group] = (counts[it.group] ?: 0) + 1 }
-        val own = counts.map { (name, count) -> GroupEntry(name, count, favorite = "$sourceId|$name" in favoriteGroups) }
+        val own = counts.map { (name, count) ->
+            GroupEntry(
+                name,
+                count,
+                favorite =
+                    "$sourceId|$name" in favoriteGroups,
+            )
+        }
         val groups = listOf(
-            GroupEntry(GROUP_ALL, all.size),
-            GroupEntry(GROUP_FAVORITES, all.count { it.id in favorites }),
+            GroupEntry(
+                GROUP_ALL,
+                all.size,
+            ),
+            GroupEntry(
+                GROUP_FAVORITES,
+                all.count { it.id in favorites },
+            ),
         ) + own.filter { it.favorite } + own.filterNot { it.favorite }
         val group = sel.group?.takeIf { name -> groups.any { it.name == name } }
         val inGroup = when (group) {
@@ -83,8 +115,15 @@ class LiveTvViewModel(private val repository: IptvRepository) : ViewModel() {
         val q = sel.query.trim()
         // Searching from the group list covers every channel; inside a group, just that group.
         val shown = when {
-            q.isNotEmpty() -> inGroup.filter { it.name.contains(q, ignoreCase = true) }
+            q.isNotEmpty() -> inGroup.filter {
+                it.name.contains(
+                    q,
+                    ignoreCase = true,
+                )
+            }
+
             group == null -> emptyList()
+
             else -> inGroup
         }
         LiveTvUiState(
@@ -100,7 +139,11 @@ class LiveTvViewModel(private val repository: IptvRepository) : ViewModel() {
             status = st,
             showGuide = sel.guide,
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), LiveTvUiState())
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5_000),
+        LiveTvUiState(),
+    )
 
     init {
         viewModelScope.launch {
@@ -118,16 +161,25 @@ class LiveTvViewModel(private val repository: IptvRepository) : ViewModel() {
     }
 
     fun selectSource(id: String) {
-        selection.value = Selection(sourceId = id, guide = selection.value.guide)
+        selection.value = Selection(
+            sourceId = id,
+            guide = selection.value.guide,
+        )
     }
 
     fun backToGroups() {
-        selection.value = selection.value.copy(group = null, query = "")
+        selection.value = selection.value.copy(
+            group = null,
+            query = "",
+        )
     }
 
     fun toggleFavoriteGroup(group: String) {
         val sourceId = state.value.sourceId ?: return
-        repository.toggleFavoriteGroup(sourceId, group)
+        repository.toggleFavoriteGroup(
+            sourceId,
+            group,
+        )
     }
 
     fun toggleGuide() {
@@ -135,7 +187,10 @@ class LiveTvViewModel(private val repository: IptvRepository) : ViewModel() {
     }
 
     fun selectGroup(group: String) {
-        selection.value = selection.value.copy(group = group, query = "")
+        selection.value = selection.value.copy(
+            group = group,
+            query = "",
+        )
     }
 
     fun search(query: String) {
@@ -153,18 +208,46 @@ class LiveTvViewModel(private val repository: IptvRepository) : ViewModel() {
             var failure: LiveTvStatus.Failed? = null
             for (source in repository.sources.value) {
                 try {
-                    status.value = LiveTvStatus.Loading(source.name, guide = false, quiet = quiet)
+                    status.value = LiveTvStatus.Loading(
+                        source.name,
+                        guide = false,
+                        quiet = quiet,
+                    )
                     repository.refreshChannels(source)
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
                     val hasChannels = repository.channels.value[source.id].orEmpty().isNotEmpty()
-                    if (!(quiet && hasChannels)) failure = failure ?: LiveTvStatus.Failed(source.name, e.message ?: e::class.simpleName.orEmpty())
+                    if (!(quiet && hasChannels)) {
+                        failure =
+                            failure
+                                ?: LiveTvStatus.Failed(
+                                    source.name,
+                                    e.message ?: e::class.simpleName.orEmpty(),
+                                )
+                    }
                 }
                 // Guides are kept a while (hosts limit downloads); a source left with no guide at all says why.
-                status.value = LiveTvStatus.Loading(source.name, guide = true, quiet = quiet)
-                val maxAge = if (quiet) IptvRepository.GUIDE_MAX_AGE_MS else IptvRepository.GUIDE_MANUAL_MAX_AGE_MS
-                repository.refreshGuide(source, maxAge)?.let { failure = failure ?: LiveTvStatus.Failed(source.name, it) }
+                status.value = LiveTvStatus.Loading(
+                    source.name,
+                    guide = true,
+                    quiet = quiet,
+                )
+                val maxAge = if (quiet) {
+                    IptvRepository.GUIDE_MAX_AGE_MS
+                } else {
+                    IptvRepository.GUIDE_MANUAL_MAX_AGE_MS
+                }
+                repository.refreshGuide(
+                    source,
+                    maxAge,
+                )?.let {
+                    failure =
+                        failure ?: LiveTvStatus.Failed(
+                            source.name,
+                            it,
+                        )
+                }
             }
             status.value = failure
         }

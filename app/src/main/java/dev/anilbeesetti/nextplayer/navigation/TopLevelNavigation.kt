@@ -128,6 +128,7 @@ enum class TopLevelDestination(
         R.string.live_tv,
         TopLevelFabKey.LIVE_TV,
     ),
+
     // Overtime: Movies & series and Continue watching; Network and Playlists open from More.
     LIBRARY(
         LibraryRoute,
@@ -163,7 +164,9 @@ fun rememberTopLevelNavState(): TopLevelNavState {
         backStack.ensureRoot(dest.route)
         dest.route to backStack
     }
-    val selectedIndex = rememberSaveable { mutableIntStateOf(value = destinations.indexOf(TopLevelDestination.START)) }
+    val selectedIndex = rememberSaveable {
+        mutableIntStateOf(value = destinations.indexOf(TopLevelDestination.START))
+    }
     return remember(
         backStacks,
         selectedIndex,
@@ -192,7 +195,9 @@ class TopLevelNavState(
     var selectedIndex by selectedIndexState
         private set
 
-    private val startIndex: Int get() = destinations.indexOf(TopLevelDestination.START).coerceAtLeast(0)
+    private val startIndex: Int get() = destinations.indexOf(
+        TopLevelDestination.START,
+    ).coerceAtLeast(0)
 
     private val startRoute: NavKey get() = destinations[startIndex].route
 

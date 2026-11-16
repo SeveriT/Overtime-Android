@@ -31,19 +31,66 @@ class XmltvParserTest {
     @Test
     fun readsProgrammesAndMatchesByIdOrName() {
         val epg = XmltvParser.parse(xml.byteInputStream())
-        val byId = Channel("a", "s", "Whatever", "g", "u", epgId = "yle1.fi")
-        val byName = Channel("b", "s", "Yle TV1 HD", "g", "u")
-        val (now, next) = epg.nowNext(byId, at1830)
-        assertEquals("News", now?.title)
-        assertEquals("The day's news.", now?.description)
-        assertEquals("Liiga: HIFK – Tappara", next?.title)
-        assertEquals("News", epg.nowNext(byName, at1830).first?.title)
-        assertNull(epg.nowNext(Channel("c", "s", "Unknown", "g", "u"), at1830).first)
+        val byId = Channel(
+            "a",
+            "s",
+            "Whatever",
+            "g",
+            "u",
+            epgId = "yle1.fi",
+        )
+        val byName = Channel(
+            "b",
+            "s",
+            "Yle TV1 HD",
+            "g",
+            "u",
+        )
+        val (now, next) = epg.nowNext(
+            byId,
+            at1830,
+        )
+        assertEquals(
+            "News",
+            now?.title,
+        )
+        assertEquals(
+            "The day's news.",
+            now?.description,
+        )
+        assertEquals(
+            "Liiga: HIFK – Tappara",
+            next?.title,
+        )
+        assertEquals(
+            "News",
+            epg.nowNext(
+                byName,
+                at1830,
+            ).first?.title,
+        )
+        assertNull(
+            epg.nowNext(
+                Channel(
+                    "c",
+                    "s",
+                    "Unknown",
+                    "g",
+                    "u",
+                ),
+                at1830,
+            ).first,
+        )
     }
 
     @Test
     fun readsGzip() {
-        val bytes = ByteArrayOutputStream().also { out -> GZIPOutputStream(out).use { it.write(xml.toByteArray()) } }.toByteArray()
-        assertEquals(2, XmltvParser.parse(bytes.inputStream()).programmes.getValue("yle1.fi").size)
+        val bytes = ByteArrayOutputStream().also { out ->
+            GZIPOutputStream(out).use { it.write(xml.toByteArray()) }
+        }.toByteArray()
+        assertEquals(
+            2,
+            XmltvParser.parse(bytes.inputStream()).programmes.getValue("yle1.fi").size,
+        )
     }
 }

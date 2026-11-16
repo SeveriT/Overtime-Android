@@ -41,11 +41,19 @@ data class PlayableItem(val url: String, val title: String)
  */
 @KoinViewModel
 class LibraryViewModel(private val repository: IptvRepository) : ViewModel() {
-    private val _state = MutableStateFlow(LibraryUiState(sources = repository.librarySources, sourceId = repository.librarySources.firstOrNull()?.id))
+    private val _state = MutableStateFlow(
+        LibraryUiState(
+            sources = repository.librarySources,
+            sourceId = repository.librarySources.firstOrNull()?.id,
+        ),
+    )
     val state: StateFlow<LibraryUiState> = _state.asStateFlow()
     private var loadJob: Job? = null
 
-    private val source: IptvSource? get() = repository.librarySources.firstOrNull { it.id == _state.value.sourceId }
+    private val source: IptvSource? get() = repository.librarySources.firstOrNull {
+        it.id ==
+            _state.value.sourceId
+    }
 
     init {
         loadCategories()
@@ -61,19 +69,46 @@ class LibraryViewModel(private val repository: IptvRepository) : ViewModel() {
     }
 
     fun selectSource(id: String) {
-        _state.update { it.copy(sourceId = id, categories = emptyList(), categoryId = null, items = emptyList(), query = "") }
+        _state.update {
+            it.copy(
+                sourceId = id,
+                categories = emptyList(),
+                categoryId = null,
+                items = emptyList(),
+                query = "",
+            )
+        }
         loadCategories()
     }
 
     fun selectKind(kind: LibraryKind) {
         if (kind == _state.value.kind) return
-        _state.update { it.copy(kind = kind, categories = emptyList(), categoryId = null, items = emptyList(), query = "") }
+        _state.update {
+            it.copy(
+                kind = kind,
+                categories = emptyList(),
+                categoryId = null,
+                items = emptyList(),
+                query = "",
+            )
+        }
         loadCategories()
     }
 
     fun selectCategory(id: String) {
-        _state.update { it.copy(categoryId = id, query = "") }
-        load { repository.libraryItems(it, _state.value.kind, id) }
+        _state.update {
+            it.copy(
+                categoryId = id,
+                query = "",
+            )
+        }
+        load {
+            repository.libraryItems(
+                it,
+                _state.value.kind,
+                id,
+            )
+        }
     }
 
     fun search(query: String) {
@@ -83,22 +118,51 @@ class LibraryViewModel(private val repository: IptvRepository) : ViewModel() {
             _state.value.categoryId?.let(::selectCategory)
             return
         }
-        load { source -> repository.libraryItems(source, _state.value.kind, null).filter { it.name.contains(q, ignoreCase = true) }.take(MAX_RESULTS) }
+        load { source ->
+            repository.libraryItems(
+                source,
+                _state.value.kind,
+                null,
+            ).filter {
+                it.name.contains(
+                    q,
+                    ignoreCase = true,
+                )
+            }.take(MAX_RESULTS)
+        }
     }
 
     private fun loadCategories() {
         val source = source ?: return
         loadJob?.cancel()
         loadJob = viewModelScope.launch {
-            _state.update { it.copy(loading = true, error = null) }
+            _state.update {
+                it.copy(
+                    loading = true,
+                    error = null,
+                )
+            }
             try {
-                val categories = repository.categories(source, _state.value.kind)
-                _state.update { it.copy(categories = categories, loading = false) }
+                val categories = repository.categories(
+                    source,
+                    _state.value.kind,
+                )
+                _state.update {
+                    it.copy(
+                        categories = categories,
+                        loading = false,
+                    )
+                }
                 categories.firstOrNull()?.let { selectCategory(it.id) }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                _state.update { it.copy(loading = false, error = e.message ?: e::class.simpleName) }
+                _state.update {
+                    it.copy(
+                        loading = false,
+                        error = e.message ?: e::class.simpleName,
+                    )
+                }
             }
         }
     }
@@ -107,14 +171,29 @@ class LibraryViewModel(private val repository: IptvRepository) : ViewModel() {
         val source = source ?: return
         loadJob?.cancel()
         loadJob = viewModelScope.launch {
-            _state.update { it.copy(loading = true, error = null) }
+            _state.update {
+                it.copy(
+                    loading = true,
+                    error = null,
+                )
+            }
             try {
                 val items = block(source)
-                _state.update { it.copy(items = items, loading = false) }
+                _state.update {
+                    it.copy(
+                        items = items,
+                        loading = false,
+                    )
+                }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                _state.update { it.copy(loading = false, error = e.message ?: e::class.simpleName) }
+                _state.update {
+                    it.copy(
+                        loading = false,
+                        error = e.message ?: e::class.simpleName,
+                    )
+                }
             }
         }
     }
@@ -143,23 +222,47 @@ class TitleDetailsViewModel(
     private val _state = MutableStateFlow(DetailsUiState(item))
     val state: StateFlow<DetailsUiState> = _state.asStateFlow()
 
-    private val source: IptvSource? get() = repository.librarySources.firstOrNull { it.id == sourceId }
+    private val source: IptvSource? get() = repository.librarySources.firstOrNull {
+        it.id ==
+            sourceId
+    }
 
     init {
         viewModelScope.launch {
             val source = source ?: return@launch
             try {
                 if (item.kind == LibraryKind.MOVIES) {
-                    val movie = repository.movieDetails(source, item)
-                    _state.update { it.copy(movie = movie, loading = false) }
+                    val movie = repository.movieDetails(
+                        source,
+                        item,
+                    )
+                    _state.update {
+                        it.copy(
+                            movie = movie,
+                            loading = false,
+                        )
+                    }
                 } else {
-                    val series = repository.seriesDetails(source, item)
-                    _state.update { it.copy(series = series, loading = false) }
+                    val series = repository.seriesDetails(
+                        source,
+                        item,
+                    )
+                    _state.update {
+                        it.copy(
+                            series = series,
+                            loading = false,
+                        )
+                    }
                 }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                _state.update { it.copy(loading = false, error = e.message ?: e::class.simpleName) }
+                _state.update {
+                    it.copy(
+                        loading = false,
+                        error = e.message ?: e::class.simpleName,
+                    )
+                }
             }
         }
     }
@@ -168,10 +271,27 @@ class TitleDetailsViewModel(
 
     fun movie(): PlayableItem? {
         val source = source ?: return null
-        val url = repository.movieUrl(source, item)
+        val url = repository.movieUrl(
+            source,
+            item,
+        )
         val image = _state.value.movie?.backdrop ?: item.backdrop ?: item.poster
-        repository.recordWatching(listOf(WatchEntry(url, source.id, item, item.name, image, playedAt = System.currentTimeMillis())))
-        return PlayableItem(url, item.name)
+        repository.recordWatching(
+            listOf(
+                WatchEntry(
+                    url,
+                    source.id,
+                    item,
+                    item.name,
+                    image,
+                    playedAt = System.currentTimeMillis(),
+                ),
+            ),
+        )
+        return PlayableItem(
+            url,
+            item.name,
+        )
     }
 
     /**
@@ -181,14 +301,21 @@ class TitleDetailsViewModel(
     fun episodesFrom(episode: Episode): List<PlayableItem> {
         val source = source ?: return emptyList()
         val series = _state.value.series
-        val season = series?.seasons?.firstOrNull { s -> s.episodes.any { it.id == episode.id } } ?: return emptyList()
+        val season =
+            series?.seasons?.firstOrNull { s -> s.episodes.any { it.id == episode.id } }
+                ?: return emptyList()
         val now = System.currentTimeMillis()
         val entries = season.episodes.dropWhile { it.id != episode.id }.map {
             WatchEntry(
-                url = repository.episodeUrl(source, it),
+                url = repository.episodeUrl(
+                    source,
+                    it,
+                ),
                 sourceId = source.id,
                 item = item,
-                title = "${item.name} · S${season.number} E${it.number}" + it.title.takeIf { t -> t.isNotBlank() }?.let { t -> " · $t" }.orEmpty(),
+                title =
+                    "${item.name} · S${season.number} E${it.number}" +
+                        it.title.takeIf { t -> t.isNotBlank() }?.let { t -> " · $t" }.orEmpty(),
                 image = it.image ?: series.backdrop ?: item.backdrop ?: item.poster,
                 season = season.number,
                 episode = it.number,
@@ -197,6 +324,11 @@ class TitleDetailsViewModel(
             )
         }
         repository.recordWatching(entries)
-        return entries.map { PlayableItem(it.url, it.title) }
+        return entries.map {
+            PlayableItem(
+                it.url,
+                it.title,
+            )
+        }
     }
 }

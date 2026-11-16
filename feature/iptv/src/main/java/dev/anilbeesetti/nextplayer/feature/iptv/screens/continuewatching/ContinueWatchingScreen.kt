@@ -76,18 +76,38 @@ import org.koin.core.annotation.KoinViewModel
  * (the player keeps a position per stream address, so this updates by itself after playing).
  */
 @KoinViewModel
-class ContinueWatchingViewModel(
-    private val repository: IptvRepository,
-    stateDao: MediumStateDao,
-) : ViewModel() {
+class ContinueWatchingViewModel(private val repository: IptvRepository, stateDao: MediumStateDao) :
+    ViewModel() {
     /** Null until loaded. */
-    val items: StateFlow<List<ContinueItem>?> = combine(repository.watching, repository.dismissed, stateDao.getAll()) { watching, dismissed, states ->
+    val items: StateFlow<List<ContinueItem>?> = combine(
+        repository.watching,
+        repository.dismissed,
+        stateDao.getAll(),
+    ) {
+            watching,
+            dismissed,
+            states,
+        ->
         val urls = watching.mapTo(HashSet()) { it.url }
         val progress = states.asSequence().filter { it.uriString in urls }.associate {
-            it.uriString to PlaybackProgress(it.playbackPosition, it.duration, it.lastPlayedTime)
+            it.uriString to PlaybackProgress(
+                it.playbackPosition,
+                it.duration,
+                it.lastPlayedTime,
+            )
         }
-        continueWatching(watching, dismissed, progress)
-    }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+        continueWatching(
+            watching,
+            dismissed,
+            progress,
+        )
+    }.flowOn(
+        Dispatchers.Default,
+    ).stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5_000),
+        null,
+    )
 
     fun dismiss(item: ContinueItem) = repository.dismissWatching(item.key)
 
@@ -95,7 +115,12 @@ class ContinueWatchingViewModel(
     fun play(item: ContinueItem): List<PlayableItem> {
         val first = item.queue.firstOrNull() ?: return emptyList()
         repository.recordWatching(listOf(first.copy(playedAt = System.currentTimeMillis())))
-        return item.queue.map { PlayableItem(it.url, it.title) }
+        return item.queue.map {
+            PlayableItem(
+                it.url,
+                it.title,
+            )
+        }
     }
 }
 
@@ -116,7 +141,10 @@ fun ContinueWatchingScreen(
                 fontWeight = FontWeight.Bold,
                 actions = {
                     IconButton(onClick = onSettings) {
-                        Icon(NextIcons.Settings, contentDescription = stringResource(R.string.settings))
+                        Icon(
+                            NextIcons.Settings,
+                            contentDescription = stringResource(R.string.settings),
+                        )
                     }
                 },
             )
@@ -124,13 +152,24 @@ fun ContinueWatchingScreen(
     ) { padding ->
         val list = items
         when {
-            list == null -> Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+            list == null -> Box(
+                Modifier.fillMaxSize().padding(padding),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator()
+            }
+
             list.isEmpty() -> Column(
                 Modifier.fillMaxSize().padding(padding).padding(32.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Icon(NextIcons.ContinueWatching, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(48.dp))
+                Icon(
+                    NextIcons.ContinueWatching,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(48.dp),
+                )
                 Text(
                     stringResource(R.string.continue_watching_empty),
                     style = MaterialTheme.typography.bodyLarge,
@@ -139,19 +178,32 @@ fun ContinueWatchingScreen(
                     modifier = Modifier.padding(top = 16.dp),
                 )
             }
+
             else -> LazyVerticalGrid(
                 columns = GridCells.Adaptive(minSize = 300.dp),
-                contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = padding.calculateTopPadding() + 8.dp, bottom = 16.dp + bottomPadding),
+                contentPadding = PaddingValues(
+                    start = 12.dp,
+                    end = 12.dp,
+                    top =
+                        padding.calculateTopPadding() + 8.dp,
+                    bottom = 16.dp + bottomPadding,
+                ),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier.fillMaxSize(),
             ) {
-                items(list, key = { it.key }) { item ->
+                items(
+                    list,
+                    key = { it.key },
+                ) { item ->
                     ContinueCard(
                         item = item,
                         onClick = {
                             if (item.kind == ContinueKind.WATCHED) {
-                                onOpenTitle(item.entry.sourceId, item.entry.item)
+                                onOpenTitle(
+                                    item.entry.sourceId,
+                                    item.entry.item,
+                                )
                             } else {
                                 onPlay(viewModel.play(item))
                             }
@@ -166,17 +218,47 @@ fun ContinueWatchingScreen(
 }
 
 @Composable
-private fun ContinueCard(item: ContinueItem, onClick: () -> Unit, onDismiss: () -> Unit, modifier: Modifier = Modifier) {
+private fun ContinueCard(
+    item: ContinueItem,
+    onClick: () -> Unit,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val entry = item.entry
-    Column(modifier.clip(RoundedCornerShape(16.dp)).clickable(onClick = onClick), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+    Column(
+        modifier.clip(RoundedCornerShape(16.dp)).clickable(onClick = onClick),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
         Box(
-            Modifier.fillMaxWidth().aspectRatio(16f / 9f).clip(RoundedCornerShape(16.dp)).background(MaterialTheme.colorScheme.surfaceContainerHigh),
+            Modifier.fillMaxWidth().aspectRatio(
+                16f / 9f,
+            ).clip(
+                RoundedCornerShape(16.dp),
+            ).background(MaterialTheme.colorScheme.surfaceContainerHigh),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(Icons.Rounded.Movie, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-            entry.image?.let { AsyncImage(model = it, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize()) }
+            Icon(
+                Icons.Rounded.Movie,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            entry.image?.let {
+                AsyncImage(
+                    model = it,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
             // Darkens the bottom so the progress bar reads on any picture.
-            Box(Modifier.fillMaxSize().background(Brush.verticalGradient(0.55f to Color.Transparent, 1f to Color.Black.copy(alpha = 0.6f))))
+            Box(
+                Modifier.fillMaxSize().background(
+                    Brush.verticalGradient(
+                        0.55f to Color.Transparent,
+                        1f to Color.Black.copy(alpha = 0.6f),
+                    ),
+                ),
+            )
             Box(
                 Modifier.size(48.dp).clip(CircleShape).background(Color.Black.copy(alpha = 0.55f)),
                 contentAlignment = Alignment.Center,
@@ -192,9 +274,22 @@ private fun ContinueCard(item: ContinueItem, onClick: () -> Unit, onDismiss: () 
                     modifier = Modifier.size(28.dp),
                 )
             }
-            IconButton(onClick = onDismiss, modifier = Modifier.align(Alignment.TopEnd).padding(4.dp)) {
-                Box(Modifier.size(32.dp).clip(CircleShape).background(Color.Black.copy(alpha = 0.55f)), contentAlignment = Alignment.Center) {
-                    Icon(Icons.Rounded.Close, contentDescription = stringResource(R.string.continue_watching_dismiss), tint = Color.White, modifier = Modifier.size(18.dp))
+            IconButton(
+                onClick = onDismiss,
+                modifier = Modifier.align(Alignment.TopEnd).padding(4.dp),
+            ) {
+                Box(
+                    Modifier.size(
+                        32.dp,
+                    ).clip(CircleShape).background(Color.Black.copy(alpha = 0.55f)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        Icons.Rounded.Close,
+                        contentDescription = stringResource(R.string.continue_watching_dismiss),
+                        tint = Color.White,
+                        modifier = Modifier.size(18.dp),
+                    )
                 }
             }
             if (item.kind == ContinueKind.RESUME && item.progress > 0f) {
@@ -204,13 +299,26 @@ private fun ContinueCard(item: ContinueItem, onClick: () -> Unit, onDismiss: () 
                     gapSize = 0.dp,
                     drawStopIndicator = {},
                     trackColor = Color.White.copy(alpha = 0.3f),
-                    modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp).height(4.dp),
+                    modifier = Modifier.align(
+                        Alignment.BottomCenter,
+                    ).fillMaxWidth().padding(
+                        horizontal = 12.dp,
+                        vertical = 10.dp,
+                    ).height(4.dp),
                 )
             }
         }
-        Row(Modifier.padding(horizontal = 4.dp), verticalAlignment = Alignment.Top) {
+        Row(
+            Modifier.padding(horizontal = 4.dp),
+            verticalAlignment = Alignment.Top,
+        ) {
             Column(Modifier.weight(1f)) {
-                Text(entry.item.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(
+                    entry.item.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
                 Text(
                     subtitle(item),
                     style = MaterialTheme.typography.bodyMedium,
@@ -227,16 +335,41 @@ private fun ContinueCard(item: ContinueItem, onClick: () -> Unit, onDismiss: () 
 private fun subtitle(item: ContinueItem): String {
     val entry = item.entry
     val episode = episodeLabel(entry)
-    val left = item.remainingMs?.let { ms -> stringResource(R.string.continue_watching_left, ((ms + 59_999) / 60_000).toInt()) }
+    val left = item.remainingMs?.let { ms ->
+        stringResource(
+            R.string.continue_watching_left,
+            (
+                (
+                    ms +
+                        59_999
+                    ) /
+                    60_000
+                ).toInt(),
+        )
+    }
     return when (item.kind) {
-        ContinueKind.RESUME -> listOfNotNull(episode, left).joinToString(" · ").ifEmpty { stringResource(R.string.continue_watching_resume) }
-        ContinueKind.NEXT -> stringResource(R.string.continue_watching_next, episode.orEmpty())
-        ContinueKind.WATCHED -> listOfNotNull(episode, stringResource(R.string.continue_watching_watched)).joinToString(" · ")
+        ContinueKind.RESUME -> listOfNotNull(
+            episode,
+            left,
+        ).joinToString(" · ").ifEmpty {
+            stringResource(R.string.continue_watching_resume)
+        }
+
+        ContinueKind.NEXT -> stringResource(
+            R.string.continue_watching_next,
+            episode.orEmpty(),
+        )
+
+        ContinueKind.WATCHED -> listOfNotNull(
+            episode,
+            stringResource(R.string.continue_watching_watched),
+        ).joinToString(" · ")
     }
 }
 
 /** "S1 E3 · Title" for an episode, null for a movie. */
 private fun episodeLabel(entry: WatchEntry): String? {
     if (!entry.isEpisode) return null
-    return "S${entry.season ?: 0} E${entry.episode ?: 0}" + entry.episodeTitle?.let { " · $it" }.orEmpty()
+    return "S${entry.season ?: 0} E${entry.episode ?: 0}" +
+        entry.episodeTitle?.let { " · $it" }.orEmpty()
 }

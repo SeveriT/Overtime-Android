@@ -73,7 +73,11 @@ fun NetworkScreen(viewModel: NetworkViewModel, onNavigateUp: (() -> Unit)? = nul
 }
 
 @Composable
-internal fun NetworkScreenContent(state: NetworkUiState, onAction: (NetworkAction) -> Unit, onNavigateUp: (() -> Unit)? = null) {
+internal fun NetworkScreenContent(
+    state: NetworkUiState,
+    onAction: (NetworkAction) -> Unit,
+    onNavigateUp: (() -> Unit)? = null,
+) {
     var connectionToDelete by remember { mutableStateOf<NetworkConnection?>(value = null) }
     var streamUrl by rememberSaveable { mutableStateOf(value = "") }
     val trimmedStreamUrl = streamUrl.trim()
@@ -94,8 +98,13 @@ internal fun NetworkScreenContent(state: NetworkUiState, onAction: (NetworkActio
     Scaffold(
         floatingActionButton = {
             if (onNavigateUp != null) {
-                androidx.compose.material3.FloatingActionButton(onClick = { onAction(NetworkAction.AddConnection) }) {
-                    Icon(imageVector = NextIcons.Add, contentDescription = null)
+                androidx.compose.material3.FloatingActionButton(onClick = {
+                    onAction(NetworkAction.AddConnection)
+                }) {
+                    Icon(
+                        imageVector = NextIcons.Add,
+                        contentDescription = null,
+                    )
                 }
             }
         },
@@ -105,8 +114,14 @@ internal fun NetworkScreenContent(state: NetworkUiState, onAction: (NetworkActio
                 fontWeight = FontWeight.Bold,
                 navigationIcon = {
                     if (onNavigateUp != null) {
-                        IconButton(onClick = onNavigateUp, modifier = Modifier.tvFocusRing()) {
-                            Icon(imageVector = NextIcons.ArrowBack, contentDescription = stringResource(R.string.navigate_up))
+                        IconButton(
+                            onClick = onNavigateUp,
+                            modifier = Modifier.tvFocusRing(),
+                        ) {
+                            Icon(
+                                imageVector = NextIcons.ArrowBack,
+                                contentDescription = stringResource(R.string.navigate_up),
+                            )
                         }
                     }
                 },

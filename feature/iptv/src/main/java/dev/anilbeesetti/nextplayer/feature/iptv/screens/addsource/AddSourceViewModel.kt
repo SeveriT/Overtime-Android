@@ -11,8 +11,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.koin.core.annotation.KoinViewModel
 import org.koin.core.annotation.InjectedParam
+import org.koin.core.annotation.KoinViewModel
 
 data class AddSourceUiState(
     val type: SourceType = SourceType.M3U_URL,
@@ -25,7 +25,8 @@ data class AddSourceUiState(
     val error: String? = null,
     val editing: Boolean = false,
 ) {
-    val canSave: Boolean get() = url.isNotBlank() && (type == SourceType.M3U_URL || (username.isNotBlank() && password.isNotBlank()))
+    val canSave: Boolean get() = url.isNotBlank() &&
+        (type == SourceType.M3U_URL || (username.isNotBlank() && password.isNotBlank()))
 }
 
 /** Adds a playlist or Xtream login (or edits one), then loads its channels and guide straight away. */
@@ -36,12 +37,22 @@ class AddSourceViewModel(
 ) : ViewModel() {
     private val _state = MutableStateFlow(
         repository.sources.value.firstOrNull { it.id == sourceId }?.let {
-            AddSourceUiState(it.type, it.name, it.url, it.username, it.password, it.epgUrl, editing = true)
+            AddSourceUiState(
+                it.type,
+                it.name,
+                it.url,
+                it.username,
+                it.password,
+                it.epgUrl,
+                editing = true,
+            )
         } ?: AddSourceUiState(),
     )
     val state: StateFlow<AddSourceUiState> = _state.asStateFlow()
 
-    fun update(transform: (AddSourceUiState) -> AddSourceUiState) = _state.update { transform(it).copy(error = null) }
+    fun update(transform: (AddSourceUiState) -> AddSourceUiState) = _state.update {
+        transform(it).copy(error = null)
+    }
 
     /** Saves and loads the source; [onDone] runs once the channels are in. */
     fun save(onDone: () -> Unit) {
@@ -56,7 +67,12 @@ class AddSourceViewModel(
             password = s.password,
             epgUrl = s.epgUrl.trim(),
         )
-        _state.update { it.copy(saving = true, error = null) }
+        _state.update {
+            it.copy(
+                saving = true,
+                error = null,
+            )
+        }
         viewModelScope.launch {
             try {
                 repository.refreshChannels(source)
@@ -64,11 +80,21 @@ class AddSourceViewModel(
                 onDone()
                 // The guide can take a while; it fills in on the Live TV screen.
                 // Always fetched anew here: the guide address may just have changed.
-                runCatching { repository.refreshGuide(source, maxAgeMs = 0) }
+                runCatching {
+                    repository.refreshGuide(
+                        source,
+                        maxAgeMs = 0,
+                    )
+                }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                _state.update { it.copy(saving = false, error = e.message ?: e::class.simpleName) }
+                _state.update {
+                    it.copy(
+                        saving = false,
+                        error = e.message ?: e::class.simpleName,
+                    )
+                }
             }
         }
     }
@@ -79,5 +105,6 @@ class AddSourceViewModel(
     }
 
     private fun defaultName(s: AddSourceUiState): String =
-        runCatching { java.net.URI(s.url.trim()).host }.getOrNull()?.removePrefix("www.") ?: "Playlist"
+        runCatching { java.net.URI(s.url.trim()).host }.getOrNull()?.removePrefix("www.")
+            ?: "Playlist"
 }

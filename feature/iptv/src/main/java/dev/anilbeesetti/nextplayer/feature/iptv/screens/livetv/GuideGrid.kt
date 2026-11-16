@@ -86,7 +86,8 @@ internal fun GuideGrid(
 
     // Open with "now" a little in from the left.
     LaunchedEffect(start) {
-        val nowX = with(density) { (MinuteWidth * ((now - start) / 60_000L).toInt() - 24.dp).toPx() }
+        val nowX =
+            with(density) { (MinuteWidth * ((now - start) / 60_000L).toInt() - 24.dp).toPx() }
         scroll.scrollTo(nowX.toInt().coerceAtLeast(0))
     }
 
@@ -102,7 +103,10 @@ internal fun GuideGrid(
                             formatClock(slot),
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.offset(x = MinuteWidth * ((slot - start) / 60_000L).toInt() + 6.dp).align(Alignment.CenterStart),
+                            modifier = Modifier.offset(
+                                x =
+                                    MinuteWidth * ((slot - start) / 60_000L).toInt() + 6.dp,
+                            ).align(Alignment.CenterStart),
                         )
                         slot += SLOT_MS
                     }
@@ -110,15 +114,33 @@ internal fun GuideGrid(
             }
             HorizontalDivider()
             LazyColumn(contentPadding = PaddingValues(bottom = bottomPadding)) {
-                items(channels, key = { it.id }) { channel ->
-                    GuideRow(channel, epg, start, end, now, totalWidth, scroll, onPlay = { onPlay(channel) }) { programme ->
+                items(
+                    channels,
+                    key = { it.id },
+                ) { channel ->
+                    GuideRow(
+                        channel,
+                        epg,
+                        start,
+                        end,
+                        now,
+                        totalWidth,
+                        scroll,
+                        onPlay = {
+                            onPlay(channel)
+                        },
+                    ) { programme ->
                         picked = channel to programme
                     }
                 }
             }
         }
         // The "now" line, following the sideways scroll.
-        val nowOffset = with(density) { ChannelColumnWidth + MinuteWidth * ((now - start) / 60_000L).toInt() - scroll.value.toDp() }
+        val nowOffset = with(density) {
+            ChannelColumnWidth +
+                MinuteWidth * ((now - start) / 60_000L).toInt() -
+                scroll.value.toDp()
+        }
         if (nowOffset > ChannelColumnWidth) {
             Box(
                 Modifier
@@ -132,15 +154,26 @@ internal fun GuideGrid(
 
     picked?.let { (channel, programme) ->
         ModalBottomSheet(onDismissRequest = { picked = null }) {
-            Column(Modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(bottom = 32.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(programme.title, style = MaterialTheme.typography.titleLarge)
+            Column(
+                Modifier.fillMaxWidth().padding(horizontal = 24.dp).padding(bottom = 32.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 Text(
-                    "${channel.name} · ${formatClock(programme.start)}–${formatClock(programme.stop)}",
+                    programme.title,
+                    style = MaterialTheme.typography.titleLarge,
+                )
+                Text(
+                    "${channel.name} · ${formatClock(
+                        programme.start,
+                    )}–${formatClock(programme.stop)}",
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
                 )
                 if (programme.description.isNotBlank()) {
-                    Text(programme.description, style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        programme.description,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
                 }
                 Button(
                     onClick = {
@@ -149,8 +182,17 @@ internal fun GuideGrid(
                     },
                     modifier = Modifier.padding(top = 8.dp),
                 ) {
-                    Icon(Icons.Rounded.PlayArrow, contentDescription = null)
-                    Text(stringResource(R.string.live_tv_watch_channel, channel.name), modifier = Modifier.padding(start = 8.dp))
+                    Icon(
+                        Icons.Rounded.PlayArrow,
+                        contentDescription = null,
+                    )
+                    Text(
+                        stringResource(
+                            R.string.live_tv_watch_channel,
+                            channel.name,
+                        ),
+                        modifier = Modifier.padding(start = 8.dp),
+                    )
                 }
             }
         }
@@ -169,7 +211,11 @@ private fun GuideRow(
     onPlay: () -> Unit,
     onPick: (Programme) -> Unit,
 ) {
-    val programmes = remember(channel.id, epg, start) {
+    val programmes = remember(
+        channel.id,
+        epg,
+        start,
+    ) {
         epg.programmesFor(channel).filter { it.stop > start && it.start < end }
     }
     Row(Modifier.fillMaxWidth().height(RowHeight)) {
@@ -183,13 +229,37 @@ private fun GuideRow(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            Box(Modifier.size(32.dp), contentAlignment = Alignment.Center) {
-                Icon(Icons.Rounded.LiveTv, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
-                channel.logo?.let { AsyncImage(model = it, contentDescription = null, contentScale = ContentScale.Fit, modifier = Modifier.fillMaxSize()) }
+            Box(
+                Modifier.size(32.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    Icons.Rounded.LiveTv,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(20.dp),
+                )
+                channel.logo?.let {
+                    AsyncImage(
+                        model = it,
+                        contentDescription = null,
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
             }
-            Text(channel.name, style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(
+                channel.name,
+                style = MaterialTheme.typography.labelSmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
-        Box(Modifier.horizontalScroll(scroll).width(totalWidth).fillMaxHeight().padding(vertical = 3.dp)) {
+        Box(
+            Modifier.horizontalScroll(
+                scroll,
+            ).width(totalWidth).fillMaxHeight().padding(vertical = 3.dp),
+        ) {
             if (programmes.isEmpty()) {
                 Text(
                     stringResource(R.string.live_tv_no_guide),
@@ -199,8 +269,14 @@ private fun GuideRow(
                 )
             }
             programmes.forEach { programme ->
-                val from = maxOf(programme.start, start)
-                val to = minOf(programme.stop, end)
+                val from = maxOf(
+                    programme.start,
+                    start,
+                )
+                val to = minOf(
+                    programme.stop,
+                    end,
+                )
                 val airing = programme.start <= now && now < programme.stop
                 val over = programme.stop <= now
                 Column(
@@ -218,11 +294,24 @@ private fun GuideRow(
                             },
                         )
                         .clickable { onPick(programme) }
-                        .padding(horizontal = 8.dp, vertical = 6.dp),
+                        .padding(
+                            horizontal = 8.dp,
+                            vertical = 6.dp,
+                        ),
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    val color = if (airing) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
-                    Text(programme.title, style = MaterialTheme.typography.labelLarge, color = color, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    val color = if (airing) {
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.onSurface
+                    }
+                    Text(
+                        programme.title,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = color,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
                     Text(
                         "${formatClock(programme.start)}–${formatClock(programme.stop)}",
                         style = MaterialTheme.typography.labelSmall,
@@ -235,4 +324,7 @@ private fun GuideRow(
     }
 }
 
-private fun formatClock(millis: Long): String = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(millis))
+private fun formatClock(millis: Long): String = SimpleDateFormat(
+    "HH:mm",
+    Locale.getDefault(),
+).format(Date(millis))

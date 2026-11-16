@@ -65,7 +65,10 @@ fun EntryProviderScope<NavKey>.networkEntry(
             parameters = { parametersOf(output) },
         )
         SideEffect { viewModel.output = output }
-        NetworkScreen(viewModel = viewModel, onNavigateUp = onNavigateUp)
+        NetworkScreen(
+            viewModel = viewModel,
+            onNavigateUp = onNavigateUp,
+        )
     }
 }
 

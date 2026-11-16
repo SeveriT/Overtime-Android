@@ -128,6 +128,8 @@ class KoinGraphTest {
                         openSettings = {},
                         openTrash = {},
                         openVault = {},
+                        openNetwork = {},
+                        openPlaylists = {},
                     ),
                 )
                 viewModel<TrashViewModel>(

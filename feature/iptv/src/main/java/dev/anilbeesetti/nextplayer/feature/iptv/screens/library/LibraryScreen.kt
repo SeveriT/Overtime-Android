@@ -67,7 +67,11 @@ import dev.anilbeesetti.nextplayer.feature.iptv.model.LibraryKind
 /** Movies or Series: category chips, search, and a poster grid. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LibraryScreen(viewModel: LibraryViewModel, onOpen: (sourceId: String, item: LibraryItem) -> Unit, onSettings: () -> Unit) {
+fun LibraryScreen(
+    viewModel: LibraryViewModel,
+    onOpen: (sourceId: String, item: LibraryItem) -> Unit,
+    onSettings: () -> Unit,
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val bottomPadding = LocalNavigationBottomPadding.current
     // A tab of its own now: sources added in Live TV meanwhile show up when it's opened again.
@@ -79,7 +83,10 @@ fun LibraryScreen(viewModel: LibraryViewModel, onOpen: (sourceId: String, item: 
                 fontWeight = FontWeight.Bold,
                 actions = {
                     IconButton(onClick = onSettings) {
-                        Icon(NextIcons.Settings, contentDescription = stringResource(R.string.settings))
+                        Icon(
+                            NextIcons.Settings,
+                            contentDescription = stringResource(R.string.settings),
+                        )
                     }
                 },
             )
@@ -95,64 +102,167 @@ fun LibraryScreen(viewModel: LibraryViewModel, onOpen: (sourceId: String, item: 
                 return@Column
             }
             if (state.sources.size > 1) {
-                LazyRow(contentPadding = PaddingValues(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    items(state.sources, key = { it.id }) { source ->
-                        FilterChip(selected = source.id == state.sourceId, onClick = { viewModel.selectSource(source.id) }, label = { Text(source.name) })
+                LazyRow(
+                    contentPadding = PaddingValues(horizontal = 12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    items(
+                        state.sources,
+                        key = { it.id },
+                    ) { source ->
+                        FilterChip(
+                            selected = source.id == state.sourceId,
+                            onClick = {
+                                viewModel.selectSource(source.id)
+                            },
+                            label = { Text(source.name) },
+                        )
                     }
                 }
             }
-            SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp)) {
-                listOf(LibraryKind.MOVIES to R.string.library_movies, LibraryKind.SERIES to R.string.library_series).forEachIndexed { index, (kind, label) ->
+            SingleChoiceSegmentedButtonRow(
+                Modifier.fillMaxWidth().padding(
+                    horizontal = 12.dp,
+                    vertical = 4.dp,
+                ),
+            ) {
+                listOf(
+                    LibraryKind.MOVIES to R.string.library_movies,
+                    LibraryKind.SERIES to R.string.library_series,
+                ).forEachIndexed {
+                        index,
+                        (kind, label),
+                    ->
                     SegmentedButton(
                         selected = state.kind == kind,
                         onClick = { viewModel.selectKind(kind) },
-                        shape = SegmentedButtonDefaults.itemShape(index, 2),
+                        shape = SegmentedButtonDefaults.itemShape(
+                            index,
+                            2,
+                        ),
                     ) { Text(stringResource(label)) }
                 }
             }
             OutlinedTextField(
                 value = state.query,
                 onValueChange = viewModel::search,
-                placeholder = { Text(stringResource(if (state.kind == LibraryKind.MOVIES) R.string.library_search_movies else R.string.library_search_series)) },
-                leadingIcon = { Icon(Icons.Rounded.Search, contentDescription = null) },
+                placeholder = {
+                    Text(
+                        stringResource(
+                            if (state.kind ==
+                                LibraryKind.MOVIES
+                            ) {
+                                R.string.library_search_movies
+                            } else {
+                                R.string.library_search_series
+                            },
+                        ),
+                    )
+                },
+                leadingIcon = {
+                    Icon(
+                        Icons.Rounded.Search,
+                        contentDescription = null,
+                    )
+                },
                 trailingIcon = if (state.query.isNotEmpty()) {
-                    { IconButton(onClick = { viewModel.search("") }) { Icon(Icons.Rounded.Close, contentDescription = stringResource(R.string.live_tv_clear_search)) } }
+                    {
+                        IconButton(onClick = {
+                            viewModel.search("")
+                        }) {
+                            Icon(
+                                Icons.Rounded.Close,
+                                contentDescription = stringResource(R.string.live_tv_clear_search),
+                            )
+                        }
+                    }
                 } else {
                     null
                 },
                 singleLine = true,
                 shape = RoundedCornerShape(28.dp),
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
+                modifier = Modifier.fillMaxWidth().padding(
+                    horizontal = 12.dp,
+                    vertical = 4.dp,
+                ),
             )
             if (state.query.isBlank() && state.categories.isNotEmpty()) {
-                LazyRow(contentPadding = PaddingValues(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    items(state.categories, key = { it.id }) { category ->
+                LazyRow(
+                    contentPadding = PaddingValues(horizontal = 12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    items(
+                        state.categories,
+                        key = { it.id },
+                    ) { category ->
                         FilterChip(
                             selected = category.id == state.categoryId,
                             onClick = { viewModel.selectCategory(category.id) },
-                            label = { Text(category.name, maxLines = 1) },
+                            label = {
+                                Text(
+                                    category.name,
+                                    maxLines = 1,
+                                )
+                            },
                         )
                     }
                 }
             }
-            if (state.loading) LinearProgressIndicator(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp))
-            state.error?.let { Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(16.dp)) }
-            if (!state.loading && state.error == null && state.items.isEmpty() && (state.query.isNotBlank() || state.categoryId != null)) {
+            if (state.loading) {
+                LinearProgressIndicator(
+                    Modifier.fillMaxWidth().padding(
+                        horizontal = 12.dp,
+                        vertical = 4.dp,
+                    ),
+                )
+            }
+            state.error?.let {
                 Text(
-                    stringResource(if (state.query.isNotBlank()) R.string.library_no_match else R.string.library_empty_category),
+                    it,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(16.dp),
+                )
+            }
+            if (!state.loading && state.error == null && state.items.isEmpty() &&
+                (state.query.isNotBlank() || state.categoryId != null)
+            ) {
+                Text(
+                    stringResource(
+                        if (state.query.isNotBlank()) {
+                            R.string.library_no_match
+                        } else {
+                            R.string.library_empty_category
+                        },
+                    ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(24.dp),
                 )
             }
             LazyVerticalGrid(
                 columns = GridCells.Adaptive(minSize = 108.dp),
-                contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 12.dp, bottom = 12.dp + bottomPadding),
+                contentPadding = PaddingValues(
+                    start = 12.dp,
+                    end = 12.dp,
+                    top = 12.dp,
+                    bottom =
+                        12.dp + bottomPadding,
+                ),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp),
                 modifier = Modifier.fillMaxSize(),
             ) {
-                items(state.items, key = { "${it.kind}:${it.id}" }) { item ->
-                    PosterCard(item) { state.sourceId?.let { onOpen(it, item) } }
+                items(
+                    state.items,
+                    key = { "${it.kind}:${it.id}" },
+                ) { item ->
+                    PosterCard(item) {
+                        state.sourceId?.let {
+                            onOpen(
+                                it,
+                                item,
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -161,33 +271,83 @@ fun LibraryScreen(viewModel: LibraryViewModel, onOpen: (sourceId: String, item: 
 
 @Composable
 private fun PosterCard(item: LibraryItem, onClick: () -> Unit) {
-    Column(Modifier.clickable(onClick = onClick), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    Column(
+        Modifier.clickable(onClick = onClick),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
         Box(
-            Modifier.fillMaxWidth().aspectRatio(2f / 3f).clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surfaceContainerHigh),
+            Modifier.fillMaxWidth().aspectRatio(
+                2f / 3f,
+            ).clip(
+                RoundedCornerShape(12.dp),
+            ).background(MaterialTheme.colorScheme.surfaceContainerHigh),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(Icons.Rounded.Movie, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-            item.poster?.let { AsyncImage(model = it, contentDescription = item.name, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize()) }
+            Icon(
+                Icons.Rounded.Movie,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            item.poster?.let {
+                AsyncImage(
+                    model = it,
+                    contentDescription = item.name,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
             item.rating?.let { rating ->
                 Row(
-                    Modifier.align(Alignment.TopEnd).padding(6.dp).clip(RoundedCornerShape(6.dp)).background(Color.Black.copy(alpha = 0.65f))
-                        .padding(horizontal = 5.dp, vertical = 1.dp),
+                    Modifier.align(
+                        Alignment.TopEnd,
+                    ).padding(
+                        6.dp,
+                    ).clip(RoundedCornerShape(6.dp)).background(Color.Black.copy(alpha = 0.65f))
+                        .padding(
+                            horizontal = 5.dp,
+                            vertical = 1.dp,
+                        ),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Icon(Icons.Rounded.Star, contentDescription = null, tint = Color(0xFFFFC107), modifier = Modifier.size(11.dp))
-                    Text(rating.take(3), style = MaterialTheme.typography.labelSmall, color = Color.White, modifier = Modifier.padding(start = 2.dp))
+                    Icon(
+                        Icons.Rounded.Star,
+                        contentDescription = null,
+                        tint = Color(0xFFFFC107),
+                        modifier = Modifier.size(11.dp),
+                    )
+                    Text(
+                        rating.take(3),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.White,
+                        modifier = Modifier.padding(start = 2.dp),
+                    )
                 }
             }
         }
-        Text(item.name, style = MaterialTheme.typography.labelLarge, maxLines = 2, overflow = TextOverflow.Ellipsis)
-        item.year?.let { Text(it, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+        Text(
+            item.name,
+            style = MaterialTheme.typography.labelLarge,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+        )
+        item.year?.let {
+            Text(
+                it,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 
 /** A movie (Play) or a series (seasons and episodes). */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TitleDetailsScreen(viewModel: TitleDetailsViewModel, onBack: () -> Unit, onPlay: (List<PlayableItem>) -> Unit) {
+fun TitleDetailsScreen(
+    viewModel: TitleDetailsViewModel,
+    onBack: () -> Unit,
+    onPlay: (List<PlayableItem>) -> Unit,
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val item = state.item
     Scaffold(
@@ -195,54 +355,130 @@ fun TitleDetailsScreen(viewModel: TitleDetailsViewModel, onBack: () -> Unit, onP
             NextTopAppBar(
                 title = item.name,
                 navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.navigate_up)) }
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            Icons.AutoMirrored.Rounded.ArrowBack,
+                            contentDescription = stringResource(R.string.navigate_up),
+                        )
+                    }
                 },
             )
         },
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState())) {
-            val backdrop = state.movie?.backdrop ?: state.series?.backdrop ?: item.backdrop ?: item.poster
-            Box(Modifier.fillMaxWidth().aspectRatio(16f / 9f).background(MaterialTheme.colorScheme.surfaceContainerHigh)) {
-                backdrop?.let { AsyncImage(model = it, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize()) }
+            val backdrop =
+                state.movie?.backdrop ?: state.series?.backdrop ?: item.backdrop ?: item.poster
+            Box(
+                Modifier.fillMaxWidth().aspectRatio(
+                    16f / 9f,
+                ).background(MaterialTheme.colorScheme.surfaceContainerHigh),
+            ) {
+                backdrop?.let {
+                    AsyncImage(
+                        model = it,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
                 Box(
                     Modifier.fillMaxWidth().height(72.dp).align(Alignment.BottomCenter)
-                        .background(Brush.verticalGradient(listOf(Color.Transparent, MaterialTheme.colorScheme.background))),
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(
+                                    Color.Transparent,
+                                    MaterialTheme.colorScheme.background,
+                                ),
+                            ),
+                        ),
                 )
             }
-            Column(Modifier.padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(item.name, style = MaterialTheme.typography.headlineSmall)
+            Column(
+                Modifier.padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text(
+                    item.name,
+                    style = MaterialTheme.typography.headlineSmall,
+                )
                 val facts = listOfNotNull(
-                    item.year ?: state.movie?.releaseDate?.take(4) ?: state.series?.releaseDate?.take(4),
+                    item.year ?: state.movie?.releaseDate?.take(4)
+                        ?: state.series?.releaseDate?.take(4),
                     item.rating?.let { "★ $it" },
                     state.movie?.duration,
                     state.movie?.genre ?: state.series?.genre,
                 )
-                if (facts.isNotEmpty()) Text(facts.joinToString(" · "), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                if (facts.isNotEmpty()) {
+                    Text(
+                        facts.joinToString(" · "),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
                 if (item.kind == LibraryKind.MOVIES) {
                     Button(onClick = { viewModel.movie()?.let { onPlay(listOf(it)) } }) {
-                        Icon(Icons.Rounded.PlayArrow, contentDescription = null)
-                        Text(stringResource(R.string.library_play), modifier = Modifier.padding(start = 8.dp))
+                        Icon(
+                            Icons.Rounded.PlayArrow,
+                            contentDescription = null,
+                        )
+                        Text(
+                            stringResource(R.string.library_play),
+                            modifier = Modifier.padding(start = 8.dp),
+                        )
                     }
                 }
                 if (state.loading) CircularProgressIndicator(Modifier.padding(8.dp))
-                state.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-                (state.movie?.plot ?: state.series?.plot)?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
+                state.error?.let {
+                    Text(
+                        it,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+                (state.movie?.plot ?: state.series?.plot)?.let {
+                    Text(
+                        it,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
                 (state.movie?.cast ?: state.series?.cast)?.let {
-                    Text(stringResource(R.string.library_cast, it), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        stringResource(
+                            R.string.library_cast,
+                            it,
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
                 state.movie?.director?.let {
-                    Text(stringResource(R.string.library_director, it), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        stringResource(
+                            R.string.library_director,
+                            it,
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             }
             state.series?.let { series ->
                 val seasons = series.seasons
                 if (seasons.size > 1) {
                     LazyRow(
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                        contentPadding = PaddingValues(
+                            horizontal = 12.dp,
+                            vertical = 8.dp,
+                        ),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         items(seasons.size) { index ->
-                            FilterChip(selected = index == state.seasonIndex, onClick = { viewModel.selectSeason(index) }, label = { Text(seasons[index].name) })
+                            FilterChip(
+                                selected = index == state.seasonIndex,
+                                onClick = {
+                                    viewModel.selectSeason(index)
+                                },
+                                label = { Text(seasons[index].name) },
+                            )
                         }
                     }
                 }
@@ -251,26 +487,62 @@ fun TitleDetailsScreen(viewModel: TitleDetailsViewModel, onBack: () -> Unit, onP
                         Modifier
                             .fillMaxWidth()
                             .clickable { onPlay(viewModel.episodesFrom(episode)) }
-                            .padding(horizontal = 16.dp, vertical = 10.dp),
+                            .padding(
+                                horizontal = 16.dp,
+                                vertical = 10.dp,
+                            ),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Box(
-                            Modifier.size(width = 112.dp, height = 63.dp).clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.surfaceContainerHigh),
+                            Modifier.size(
+                                width = 112.dp,
+                                height = 63.dp,
+                            ).clip(
+                                RoundedCornerShape(8.dp),
+                            ).background(MaterialTheme.colorScheme.surfaceContainerHigh),
                             contentAlignment = Alignment.Center,
                         ) {
-                            Icon(Icons.Rounded.PlayArrow, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                            episode.image?.let { AsyncImage(model = it, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize()) }
+                            Icon(
+                                Icons.Rounded.PlayArrow,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            episode.image?.let {
+                                AsyncImage(
+                                    model = it,
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize(),
+                                )
+                            }
                         }
                         Column(Modifier.weight(1f).padding(start = 12.dp)) {
                             Text(
-                                "${episode.number}. ${episode.title.ifBlank { stringResource(R.string.library_episode, episode.number) }}",
+                                "${episode.number}. ${episode.title.ifBlank {
+                                    stringResource(
+                                        R.string.library_episode,
+                                        episode.number,
+                                    )
+                                }}",
                                 style = MaterialTheme.typography.titleSmall,
                                 maxLines = 2,
                                 overflow = TextOverflow.Ellipsis,
                             )
-                            episode.duration?.let { Text(it, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                            episode.duration?.let {
+                                Text(
+                                    it,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
                             episode.plot?.let {
-                                Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                                Text(
+                                    it,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis,
+                                )
                             }
                         }
                     }

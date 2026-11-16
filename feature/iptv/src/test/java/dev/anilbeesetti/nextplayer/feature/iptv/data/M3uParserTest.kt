@@ -18,16 +18,46 @@ class M3uParserTest {
 
     @Test
     fun readsChannelsGroupsAndGuides() {
-        val parsed = M3uParser.parsePlaylist(playlist, "src")
-        assertEquals(listOf("http://epg.example/guide.xml.gz", "http://epg.example/b.xml"), parsed.guideUrls)
-        assertEquals(3, parsed.channels.size)
+        val parsed = M3uParser.parsePlaylist(
+            playlist,
+            "src",
+        )
+        assertEquals(
+            listOf(
+                "http://epg.example/guide.xml.gz",
+                "http://epg.example/b.xml",
+            ),
+            parsed.guideUrls,
+        )
+        assertEquals(
+            3,
+            parsed.channels.size,
+        )
         val yle = parsed.channels[0]
-        assertEquals("Yle TV1 HD", yle.name)
-        assertEquals("Finland", yle.group)
-        assertEquals("yle1.fi", yle.epgId)
-        assertEquals("http://logo/yle1.png", yle.logo)
-        assertEquals("Misc", parsed.channels[1].group)
+        assertEquals(
+            "Yle TV1 HD",
+            yle.name,
+        )
+        assertEquals(
+            "Finland",
+            yle.group,
+        )
+        assertEquals(
+            "yle1.fi",
+            yle.epgId,
+        )
+        assertEquals(
+            "http://logo/yle1.png",
+            yle.logo,
+        )
+        assertEquals(
+            "Misc",
+            parsed.channels[1].group,
+        )
         assertNull(parsed.channels[1].epgId)
-        assertEquals("Named Only", parsed.channels[2].name)
+        assertEquals(
+            "Named Only",
+            parsed.channels[2].name,
+        )
     }
 }

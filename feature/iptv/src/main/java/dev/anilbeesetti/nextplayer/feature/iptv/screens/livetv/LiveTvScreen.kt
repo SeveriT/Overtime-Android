@@ -20,17 +20,17 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.List
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.List
+import androidx.compose.material.icons.automirrored.rounded.ViewList
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.GridView
-import androidx.compose.material.icons.rounded.ViewTimeline
-import androidx.compose.material.icons.automirrored.rounded.ViewList
 import androidx.compose.material.icons.rounded.LiveTv
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material.icons.rounded.StarBorder
+import androidx.compose.material.icons.rounded.ViewTimeline
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -80,13 +80,25 @@ data class LiveTvActions(
 @Composable
 fun LiveTvScreen(viewModel: LiveTvViewModel, actions: LiveTvActions) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    LiveTvContent(state, viewModel, actions)
+    LiveTvContent(
+        state,
+        viewModel,
+        actions,
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun LiveTvContent(state: LiveTvUiState, viewModel: LiveTvViewModel, actions: LiveTvActions) {
-    BindTopLevelFab(key = TopLevelFabKey.LIVE_TV, icon = NextIcons.Add, onClick = actions.addSource)
+private fun LiveTvContent(
+    state: LiveTvUiState,
+    viewModel: LiveTvViewModel,
+    actions: LiveTvActions,
+) {
+    BindTopLevelFab(
+        key = TopLevelFabKey.LIVE_TV,
+        icon = NextIcons.Add,
+        onClick = actions.addSource,
+    )
     val bottomPadding = LocalNavigationBottomPadding.current
 
     Scaffold(
@@ -98,24 +110,46 @@ private fun LiveTvContent(state: LiveTvUiState, viewModel: LiveTvViewModel, acti
                     if (state.sources.isNotEmpty()) {
                         IconButton(onClick = viewModel::toggleGuide) {
                             Icon(
-                                if (state.showGuide) Icons.AutoMirrored.Rounded.List else Icons.Rounded.ViewTimeline,
-                                contentDescription = stringResource(if (state.showGuide) R.string.live_tv_show_list else R.string.live_tv_show_guide),
+                                if (state.showGuide) {
+                                    Icons.AutoMirrored.Rounded.List
+                                } else {
+                                    Icons.Rounded.ViewTimeline
+                                },
+                                contentDescription = stringResource(
+                                    if (state.showGuide) {
+                                        R.string.live_tv_show_list
+                                    } else {
+                                        R.string.live_tv_show_guide
+                                    },
+                                ),
                             )
                         }
                     }
                     if (state.sources.isNotEmpty()) {
                         IconButton(onClick = actions.openSources) {
-                            Icon(Icons.AutoMirrored.Rounded.ViewList, contentDescription = stringResource(R.string.iptv_sources))
+                            Icon(
+                                Icons.AutoMirrored.Rounded.ViewList,
+                                contentDescription = stringResource(R.string.iptv_sources),
+                            )
                         }
                     }
                     if (state.sources.isNotEmpty()) {
-                        IconButton(onClick = { viewModel.refreshAll() }, enabled = !state.busy) {
-                            Icon(Icons.Rounded.Refresh, contentDescription = stringResource(R.string.live_tv_refresh))
+                        IconButton(
+                            onClick = { viewModel.refreshAll() },
+                            enabled = !state.busy,
+                        ) {
+                            Icon(
+                                Icons.Rounded.Refresh,
+                                contentDescription = stringResource(R.string.live_tv_refresh),
+                            )
                         }
                     }
                     // Always there, as on NextPlayer's other main screens.
                     IconButton(onClick = actions.openSettings) {
-                        Icon(NextIcons.Settings, contentDescription = stringResource(R.string.settings))
+                        Icon(
+                            NextIcons.Settings,
+                            contentDescription = stringResource(R.string.settings),
+                        )
                     }
                 },
             )
@@ -126,7 +160,12 @@ private fun LiveTvContent(state: LiveTvUiState, viewModel: LiveTvViewModel, acti
             Modifier
                 .fillMaxSize()
                 .padding(top = padding.calculateTopPadding())
-                .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+                .clip(
+                    RoundedCornerShape(
+                        topStart = 24.dp,
+                        topEnd = 24.dp,
+                    ),
+                )
                 .background(MaterialTheme.colorScheme.background),
         ) {
             if (state.sources.isEmpty()) {
@@ -136,14 +175,31 @@ private fun LiveTvContent(state: LiveTvUiState, viewModel: LiveTvViewModel, acti
             Column(Modifier.fillMaxSize()) {
                 // Sources (when there are several), then groups, then search.
                 if (state.sources.size > 1) {
-                    ChipRow(state.sources.map { it.id to it.name }, state.sourceId) { viewModel.selectSource(it) }
+                    ChipRow(
+                        state.sources.map {
+                            it.id to it.name
+                        },
+                        state.sourceId,
+                    ) { viewModel.selectSource(it) }
                 }
                 // Back from a group returns to the group list, as on Windows.
                 BackHandler(enabled = state.group != null) { viewModel.backToGroups() }
                 state.group?.let { group ->
-                    Row(Modifier.fillMaxWidth().padding(start = 4.dp, end = 16.dp, top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        Modifier.fillMaxWidth().padding(
+                            start = 4.dp,
+                            end = 16.dp,
+                            top = 4.dp,
+                        ),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
                         IconButton(onClick = viewModel::backToGroups) {
-                            Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.live_tv_back_to_groups))
+                            Icon(
+                                Icons.AutoMirrored.Rounded.ArrowBack,
+                                contentDescription = stringResource(
+                                    R.string.live_tv_back_to_groups,
+                                ),
+                            )
                         }
                         Text(
                             groupLabel(group),
@@ -157,30 +213,84 @@ private fun LiveTvContent(state: LiveTvUiState, viewModel: LiveTvViewModel, acti
                 OutlinedTextField(
                     value = state.query,
                     onValueChange = viewModel::search,
-                    placeholder = { Text(stringResource(if (state.group == null) R.string.live_tv_search else R.string.live_tv_search_group)) },
-                    leadingIcon = { Icon(Icons.Rounded.Search, contentDescription = null) },
+                    placeholder = {
+                        Text(
+                            stringResource(
+                                if (state.group ==
+                                    null
+                                ) {
+                                    R.string.live_tv_search
+                                } else {
+                                    R.string.live_tv_search_group
+                                },
+                            ),
+                        )
+                    },
+                    leadingIcon = {
+                        Icon(
+                            Icons.Rounded.Search,
+                            contentDescription = null,
+                        )
+                    },
                     trailingIcon = if (state.query.isNotEmpty()) {
-                        { IconButton(onClick = { viewModel.search("") }) { Icon(Icons.Rounded.Close, contentDescription = stringResource(R.string.live_tv_clear_search)) } }
+                        {
+                            IconButton(onClick = {
+                                viewModel.search("")
+                            }) {
+                                Icon(
+                                    Icons.Rounded.Close,
+                                    contentDescription = stringResource(
+                                        R.string.live_tv_clear_search,
+                                    ),
+                                )
+                            }
+                        }
                     } else {
                         null
                     },
                     singleLine = true,
                     shape = RoundedCornerShape(28.dp),
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
+                    modifier = Modifier.fillMaxWidth().padding(
+                        horizontal = 12.dp,
+                        vertical = 4.dp,
+                    ),
                 )
                 state.status?.let { status ->
                     Text(
                         when (status) {
                             is LiveTvStatus.Loading -> when {
-                                status.quiet -> stringResource(R.string.live_tv_updating, status.source)
-                                status.guide -> stringResource(R.string.live_tv_loading_guide, status.source)
-                                else -> stringResource(R.string.live_tv_loading_channels, status.source)
+                                status.quiet -> stringResource(
+                                    R.string.live_tv_updating,
+                                    status.source,
+                                )
+
+                                status.guide -> stringResource(
+                                    R.string.live_tv_loading_guide,
+                                    status.source,
+                                )
+
+                                else -> stringResource(
+                                    R.string.live_tv_loading_channels,
+                                    status.source,
+                                )
                             }
-                            is LiveTvStatus.Failed -> stringResource(R.string.live_tv_source_error, status.source, status.message)
+
+                            is LiveTvStatus.Failed -> stringResource(
+                                R.string.live_tv_source_error,
+                                status.source,
+                                status.message,
+                            )
                         },
                         style = MaterialTheme.typography.labelMedium,
-                        color = if (status is LiveTvStatus.Failed) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                        color = if (status is LiveTvStatus.Failed) {
+                            MaterialTheme.colorScheme.error
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                        modifier = Modifier.padding(
+                            horizontal = 16.dp,
+                            vertical = 4.dp,
+                        ),
                     )
                 }
                 if (state.group == null && state.query.isBlank()) {
@@ -195,8 +305,15 @@ private fun LiveTvContent(state: LiveTvUiState, viewModel: LiveTvViewModel, acti
                 if (state.channels.isEmpty()) {
                     Text(
                         when {
-                            state.query.isNotBlank() -> stringResource(R.string.live_tv_no_match, state.query)
-                            state.group == GROUP_FAVORITES -> stringResource(R.string.live_tv_no_favourites)
+                            state.query.isNotBlank() -> stringResource(
+                                R.string.live_tv_no_match,
+                                state.query,
+                            )
+
+                            state.group == GROUP_FAVORITES -> stringResource(
+                                R.string.live_tv_no_favourites,
+                            )
+
                             else -> stringResource(R.string.live_tv_no_channels)
                         },
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -209,23 +326,59 @@ private fun LiveTvContent(state: LiveTvUiState, viewModel: LiveTvViewModel, acti
                         epg = state.epg,
                         now = state.now,
                         bottomPadding = 8.dp + bottomPadding,
-                        onPlay = { channel -> actions.play(channel, state.channels) },
+                        onPlay = { channel ->
+                            actions.play(
+                                channel,
+                                state.channels,
+                            )
+                        },
                     )
                     return@Column
                 }
                 LazyColumn(
-                    contentPadding = PaddingValues(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 8.dp + bottomPadding),
+                    contentPadding = PaddingValues(
+                        start = 8.dp,
+                        end = 8.dp,
+                        top = 4.dp,
+                        bottom =
+                            8.dp + bottomPadding,
+                    ),
                     verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
-                    items(state.channels, key = { it.id }) { channel ->
-                        val (now, next) = remember(channel.id, state.epg, state.now) { state.epg.nowNext(channel, state.now) }
+                    items(
+                        state.channels,
+                        key = { it.id },
+                    ) { channel ->
+                        val (now, next) = remember(
+                            channel.id,
+                            state.epg,
+                            state.now,
+                        ) {
+                            state.epg.nowNext(
+                                channel,
+                                state.now,
+                            )
+                        }
                         ChannelRow(
                             channel = channel,
                             now = now?.title,
                             next = next?.let { "${formatClock(it.start)} ${it.title}" },
-                            progress = now?.let { ((state.now - it.start).toFloat() / (it.stop - it.start).coerceAtLeast(1)).coerceIn(0f, 1f) },
+                            progress = now?.let {
+                                (
+                                    (state.now - it.start).toFloat() /
+                                        (it.stop - it.start).coerceAtLeast(1)
+                                    ).coerceIn(
+                                    0f,
+                                    1f,
+                                )
+                            },
                             favorite = channel.id in state.favorites,
-                            onClick = { actions.play(channel, state.channels) },
+                            onClick = {
+                                actions.play(
+                                    channel,
+                                    state.channels,
+                                )
+                            },
                             onToggleFavorite = { viewModel.toggleFavorite(channel) },
                         )
                     }
@@ -255,16 +408,29 @@ private fun GroupList(
     onToggleFavorite: (String) -> Unit,
 ) {
     LazyColumn(
-        contentPadding = PaddingValues(start = 8.dp, end = 8.dp, top = 4.dp, bottom = bottomPadding),
+        contentPadding = PaddingValues(
+            start = 8.dp,
+            end = 8.dp,
+            top = 4.dp,
+            bottom = bottomPadding,
+        ),
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
-        items(groups, key = { it.name }) { group ->
+        items(
+            groups,
+            key = { it.name },
+        ) { group ->
             Row(
                 Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(16.dp))
                     .clickable { onOpen(group.name) }
-                    .padding(start = 12.dp, end = 4.dp, top = 4.dp, bottom = 4.dp)
+                    .padding(
+                        start = 12.dp,
+                        end = 4.dp,
+                        top = 4.dp,
+                        bottom = 4.dp,
+                    )
                     .height(48.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -275,7 +441,13 @@ private fun GroupList(
                         else -> Icons.Rounded.LiveTv
                     },
                     contentDescription = null,
-                    tint = if (group.name == GROUP_FAVORITES) Color(0xFFFFC107) else MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = if (group.name ==
+                        GROUP_FAVORITES
+                    ) {
+                        Color(0xFFFFC107)
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
                 )
                 Text(
                     groupLabel(group.name),
@@ -284,13 +456,29 @@ private fun GroupList(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f).padding(horizontal = 16.dp),
                 )
-                Text(group.count.toString(), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    group.count.toString(),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
                 if (group.name != GROUP_ALL && group.name != GROUP_FAVORITES) {
                     IconButton(onClick = { onToggleFavorite(group.name) }) {
                         Icon(
                             if (group.favorite) Icons.Rounded.Star else Icons.Rounded.StarBorder,
-                            contentDescription = stringResource(if (group.favorite) R.string.live_tv_unstar_group else R.string.live_tv_star_group),
-                            tint = if (group.favorite) Color(0xFFFFC107) else MaterialTheme.colorScheme.onSurfaceVariant,
+                            contentDescription = stringResource(
+                                if (group.favorite) {
+                                    R.string.live_tv_unstar_group
+                                } else {
+                                    R.string.live_tv_star_group
+                                },
+                            ),
+                            tint = if (group.favorite) {
+                                Color(
+                                    0xFFFFC107,
+                                )
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            },
                         )
                     }
                 } else {
@@ -302,14 +490,32 @@ private fun GroupList(
 }
 
 @Composable
-private fun ChipRow(options: List<Pair<String, String>>, selected: String?, onSelect: (String) -> Unit) {
+private fun ChipRow(
+    options: List<Pair<String, String>>,
+    selected: String?,
+    onSelect: (String) -> Unit,
+) {
     LazyRow(
         contentPadding = PaddingValues(horizontal = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.padding(top = 8.dp),
     ) {
-        items(options, key = { it.first }) { (id, label) ->
-            FilterChip(selected = id == selected, onClick = { onSelect(id) }, label = { Text(label, maxLines = 1) })
+        items(
+            options,
+            key = { it.first },
+        ) { (id, label) ->
+            FilterChip(
+                selected = id == selected,
+                onClick = {
+                    onSelect(id)
+                },
+                label = {
+                    Text(
+                        label,
+                        maxLines = 1,
+                    )
+                },
+            )
         }
     }
 }
@@ -329,20 +535,41 @@ private fun ChannelRow(
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .clickable(onClick = onClick)
-            .padding(horizontal = 8.dp, vertical = 8.dp),
+            .padding(
+                horizontal = 8.dp,
+                vertical = 8.dp,
+            ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
-            Modifier.size(48.dp).clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surfaceContainerHigh),
+            Modifier.size(
+                48.dp,
+            ).clip(
+                RoundedCornerShape(12.dp),
+            ).background(MaterialTheme.colorScheme.surfaceContainerHigh),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(Icons.Rounded.LiveTv, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            Icon(
+                Icons.Rounded.LiveTv,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             channel.logo?.let {
-                AsyncImage(model = it, contentDescription = null, contentScale = ContentScale.Fit, modifier = Modifier.fillMaxSize().padding(4.dp))
+                AsyncImage(
+                    model = it,
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.fillMaxSize().padding(4.dp),
+                )
             }
         }
         Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
-            Text(channel.name, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(
+                channel.name,
+                style = MaterialTheme.typography.titleMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
             Text(
                 now ?: channel.group,
                 style = MaterialTheme.typography.bodyMedium,
@@ -359,7 +586,10 @@ private fun ChannelRow(
             }
             next?.let {
                 Text(
-                    stringResource(R.string.live_tv_next, it),
+                    stringResource(
+                        R.string.live_tv_next,
+                        it,
+                    ),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
@@ -371,8 +601,20 @@ private fun ChannelRow(
         IconButton(onClick = onToggleFavorite) {
             Icon(
                 if (favorite) Icons.Rounded.Star else Icons.Rounded.StarBorder,
-                contentDescription = stringResource(if (favorite) R.string.live_tv_remove_favourite else R.string.live_tv_add_favourite),
-                tint = if (favorite) Color(0xFFFFC107) else MaterialTheme.colorScheme.onSurfaceVariant,
+                contentDescription = stringResource(
+                    if (favorite) {
+                        R.string.live_tv_remove_favourite
+                    } else {
+                        R.string.live_tv_add_favourite
+                    },
+                ),
+                tint = if (favorite) {
+                    Color(
+                        0xFFFFC107,
+                    )
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                },
             )
         }
     }
@@ -382,13 +624,29 @@ private fun ChannelRow(
 private fun EmptyState(onAdd: () -> Unit) {
     Column(
         Modifier.fillMaxSize().padding(32.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
+        verticalArrangement = Arrangement.spacedBy(
+            12.dp,
+            Alignment.CenterVertically,
+        ),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Box(Modifier.size(72.dp).clip(CircleShape).background(MaterialTheme.colorScheme.secondaryContainer), contentAlignment = Alignment.Center) {
-            Icon(Icons.Rounded.LiveTv, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondaryContainer, modifier = Modifier.size(36.dp))
+        Box(
+            Modifier.size(
+                72.dp,
+            ).clip(CircleShape).background(MaterialTheme.colorScheme.secondaryContainer),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                Icons.Rounded.LiveTv,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                modifier = Modifier.size(36.dp),
+            )
         }
-        Text(stringResource(R.string.live_tv), style = MaterialTheme.typography.titleLarge)
+        Text(
+            stringResource(R.string.live_tv),
+            style = MaterialTheme.typography.titleLarge,
+        )
         Text(
             stringResource(R.string.live_tv_empty),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -398,4 +656,7 @@ private fun EmptyState(onAdd: () -> Unit) {
     }
 }
 
-private fun formatClock(millis: Long): String = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(millis))
+private fun formatClock(millis: Long): String = SimpleDateFormat(
+    "HH:mm",
+    Locale.getDefault(),
+).format(Date(millis))
