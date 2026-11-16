@@ -229,9 +229,10 @@ private fun GuideRow(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            Box(
-                Modifier.size(32.dp),
-                contentAlignment = Alignment.Center,
+            ChannelLogo(
+                url = channel.logo,
+                modifier = Modifier.size(32.dp),
+                imageModifier = Modifier.fillMaxSize(),
             ) {
                 Icon(
                     Icons.Rounded.LiveTv,
@@ -239,14 +240,6 @@ private fun GuideRow(
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(20.dp),
                 )
-                channel.logo?.let {
-                    AsyncImage(
-                        model = it,
-                        contentDescription = null,
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier.fillMaxSize(),
-                    )
-                }
             }
             Text(
                 channel.name,

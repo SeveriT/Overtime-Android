@@ -541,27 +541,17 @@ private fun ChannelRow(
             ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(
-            Modifier.size(
-                48.dp,
-            ).clip(
-                RoundedCornerShape(12.dp),
-            ).background(MaterialTheme.colorScheme.surfaceContainerHigh),
-            contentAlignment = Alignment.Center,
+        ChannelLogo(
+            url = channel.logo,
+            modifier = Modifier.size(48.dp).clip(RoundedCornerShape(12.dp))
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+            imageModifier = Modifier.fillMaxSize().padding(4.dp),
         ) {
             Icon(
                 Icons.Rounded.LiveTv,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            channel.logo?.let {
-                AsyncImage(
-                    model = it,
-                    contentDescription = null,
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier.fillMaxSize().padding(4.dp),
-                )
-            }
         }
         Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
             Text(
