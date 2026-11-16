@@ -4,6 +4,8 @@ on:
   push:
     branches: [ main ]
   pull_request:
+  # Run by hand from the Actions tab: builds and tests, plus the emulator tests.
+  workflow_dispatch:
 concurrency:
   group: build-${{ github.ref }}
   cancel-in-progress: true
@@ -73,6 +75,8 @@ jobs:
 
   instrumentation:
     name: Instrumentation tests (Google ATD API 35)
+    # Emulator tests are slow and flaky on hosted runners: only when started by hand.
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
