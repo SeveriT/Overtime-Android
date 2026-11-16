@@ -10,6 +10,8 @@ import dev.anilbeesetti.nextplayer.feature.iptv.screens.library.LibraryViewModel
 import dev.anilbeesetti.nextplayer.feature.iptv.screens.library.PlayableItem
 import dev.anilbeesetti.nextplayer.feature.iptv.screens.library.TitleDetailsScreen
 import dev.anilbeesetti.nextplayer.feature.iptv.screens.library.TitleDetailsViewModel
+import dev.anilbeesetti.nextplayer.feature.iptv.screens.sources.SourcesScreen
+import dev.anilbeesetti.nextplayer.feature.iptv.screens.sources.SourcesViewModel
 import dev.anilbeesetti.nextplayer.feature.iptv.screens.addsource.AddSourceViewModel
 import dev.anilbeesetti.nextplayer.feature.iptv.screens.livetv.LiveTvActions
 import dev.anilbeesetti.nextplayer.feature.iptv.screens.livetv.LiveTvScreen
@@ -26,6 +28,19 @@ data class AddSourceRoute(val sourceId: String? = null) : NavKey
 
 @Serializable
 object LibraryRoute : NavKey
+
+@Serializable
+object SourcesRoute : NavKey
+
+fun NavBackStack<NavKey>.navigateToSources() {
+    add(element = SourcesRoute)
+}
+
+fun EntryProviderScope<NavKey>.sourcesEntry(onBack: () -> Unit, onAdd: () -> Unit, onEdit: (String) -> Unit) {
+    entry<SourcesRoute> {
+        SourcesScreen(viewModel = koinViewModel<SourcesViewModel>(), onBack = onBack, onAdd = onAdd, onEdit = onEdit)
+    }
+}
 
 @Serializable
 data class TitleRoute(val sourceId: String, val item: LibraryItem) : NavKey

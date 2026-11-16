@@ -15,6 +15,8 @@ import dev.anilbeesetti.nextplayer.feature.iptv.navigation.titleEntry
 import dev.anilbeesetti.nextplayer.feature.iptv.screens.library.PlayableItem
 import dev.anilbeesetti.nextplayer.feature.iptv.navigation.liveTvEntry
 import dev.anilbeesetti.nextplayer.feature.iptv.navigation.navigateToAddSource
+import dev.anilbeesetti.nextplayer.feature.iptv.navigation.navigateToSources
+import dev.anilbeesetti.nextplayer.feature.iptv.navigation.sourcesEntry
 import dev.anilbeesetti.nextplayer.feature.iptv.screens.livetv.LiveTvActions
 import dev.anilbeesetti.nextplayer.feature.player.PlayerActivity
 import dev.anilbeesetti.nextplayer.feature.player.utils.PlayerApi
@@ -25,11 +27,17 @@ fun EntryProviderScope<NavKey>.liveTvNavGraph(context: Context, backStack: NavBa
         actions = LiveTvActions(
             addSource = { backStack.navigateToAddSource() },
             editSource = { id -> backStack.navigateToAddSource(sourceId = id) },
+            openSources = { backStack.navigateToSources() },
             play = { channel, list -> context.playChannel(channel, list) },
             openSettings = backStack::navigateToSettings,
         ),
     )
     addSourceEntry(onNavigateUp = { backStack.removeLastIfNotRoot() })
+    sourcesEntry(
+        onBack = { backStack.removeLastIfNotRoot() },
+        onAdd = { backStack.navigateToAddSource() },
+        onEdit = { id -> backStack.navigateToAddSource(sourceId = id) },
+    )
 }
 
 /** The Movies & series tab: the library, and a title's page on top of it. */

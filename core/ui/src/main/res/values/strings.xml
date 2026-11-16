@@ -53,6 +53,11 @@
     <string name="live_tv_updating">Updating %1$s…</string>
     <string name="live_tv_source_error">%1$s: %2$s</string>
     <string name="iptv_edit_source">Edit source</string>
+    <string name="iptv_sources">Sources</string>
+    <plurals name="iptv_channel_count">
+        <item quantity="one">%1$d channel</item>
+        <item quantity="other">%1$d channels</item>
+    </plurals>
     <string name="iptv_m3u">M3U playlist</string>
     <string name="iptv_xtream">Xtream Codes</string>
     <string name="iptv_name_optional">Name (optional)</string>

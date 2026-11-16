@@ -21,7 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.List
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.ViewTimeline
-import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.automirrored.rounded.ViewList
 import androidx.compose.material.icons.rounded.LiveTv
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Search
@@ -66,6 +66,8 @@ import java.util.Locale
 data class LiveTvActions(
     val addSource: () -> Unit,
     val editSource: (String) -> Unit,
+    /** All sources, like the Sources dialog on Windows. */
+    val openSources: () -> Unit,
     /** Plays [channel], with the channels shown alongside so the player's next/previous zaps. */
     val play: (channel: Channel, list: List<Channel>) -> Unit,
     val openSettings: () -> Unit,
@@ -97,9 +99,9 @@ private fun LiveTvContent(state: LiveTvUiState, viewModel: LiveTvViewModel, acti
                             )
                         }
                     }
-                    state.sourceId?.let { id ->
-                        IconButton(onClick = { actions.editSource(id) }) {
-                            Icon(Icons.Rounded.Edit, contentDescription = stringResource(R.string.live_tv_edit_source))
+                    if (state.sources.isNotEmpty()) {
+                        IconButton(onClick = actions.openSources) {
+                            Icon(Icons.AutoMirrored.Rounded.ViewList, contentDescription = stringResource(R.string.iptv_sources))
                         }
                     }
                     if (state.sources.isNotEmpty()) {
