@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Overtime: the same dark square and white live_tv glyph as the Windows app. -->
-    <color name="ic_launcher_background_tint">#FF191C20</color>
-    <color name="ic_launcher_foreground_tint">#FFFFFFFF</color>
+    <!-- Overtime: the same light blue square and near-black live_tv glyph as the Windows app. -->
+    <color name="ic_launcher_background_tint">#FF8AD0F2</color>
+    <color name="ic_launcher_foreground_tint">#FF0A0A0B</color>
 </resources>
