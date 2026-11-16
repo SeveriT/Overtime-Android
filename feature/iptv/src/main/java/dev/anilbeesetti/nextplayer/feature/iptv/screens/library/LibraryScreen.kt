@@ -60,20 +60,29 @@ import coil3.compose.AsyncImage
 import dev.anilbeesetti.nextplayer.core.ui.R
 import dev.anilbeesetti.nextplayer.core.ui.components.LocalNavigationBottomPadding
 import dev.anilbeesetti.nextplayer.core.ui.components.NextTopAppBar
+import dev.anilbeesetti.nextplayer.core.ui.designsystem.NextIcons
 import dev.anilbeesetti.nextplayer.feature.iptv.model.LibraryItem
 import dev.anilbeesetti.nextplayer.feature.iptv.model.LibraryKind
 
 /** Movies or Series: category chips, search, and a poster grid. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LibraryScreen(viewModel: LibraryViewModel, onOpen: (sourceId: String, item: LibraryItem) -> Unit) {
+fun LibraryScreen(viewModel: LibraryViewModel, onOpen: (sourceId: String, item: LibraryItem) -> Unit, onSettings: () -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val bottomPadding = LocalNavigationBottomPadding.current
     // A tab of its own now: sources added in Live TV meanwhile show up when it's opened again.
     LaunchedEffect(Unit) { viewModel.reloadSources() }
     Scaffold(
         topBar = {
-            NextTopAppBar(title = stringResource(R.string.library_title), fontWeight = FontWeight.Bold)
+            NextTopAppBar(
+                title = stringResource(R.string.library_title),
+                fontWeight = FontWeight.Bold,
+                actions = {
+                    IconButton(onClick = onSettings) {
+                        Icon(NextIcons.Settings, contentDescription = stringResource(R.string.settings))
+                    }
+                },
+            )
         },
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(top = padding.calculateTopPadding())) {

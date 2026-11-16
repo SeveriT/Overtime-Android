@@ -34,9 +34,9 @@ fun NavBackStack<NavKey>.navigateToTitle(sourceId: String, item: LibraryItem) {
     add(element = TitleRoute(sourceId = sourceId, item = item))
 }
 
-fun EntryProviderScope<NavKey>.libraryEntry(onOpen: (String, LibraryItem) -> Unit) {
+fun EntryProviderScope<NavKey>.libraryEntry(onOpen: (String, LibraryItem) -> Unit, onSettings: () -> Unit) {
     entry<LibraryRoute> {
-        LibraryScreen(viewModel = koinViewModel<LibraryViewModel>(), onOpen = onOpen)
+        LibraryScreen(viewModel = koinViewModel<LibraryViewModel>(), onOpen = onOpen, onSettings = onSettings)
     }
 }
 

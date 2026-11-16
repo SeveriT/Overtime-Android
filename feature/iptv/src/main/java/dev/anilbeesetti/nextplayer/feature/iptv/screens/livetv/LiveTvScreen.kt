@@ -68,6 +68,7 @@ data class LiveTvActions(
     val editSource: (String) -> Unit,
     /** Plays [channel], with the channels shown alongside so the player's next/previous zaps. */
     val play: (channel: Channel, list: List<Channel>) -> Unit,
+    val openSettings: () -> Unit,
 )
 
 @Composable
@@ -105,6 +106,10 @@ private fun LiveTvContent(state: LiveTvUiState, viewModel: LiveTvViewModel, acti
                         IconButton(onClick = { viewModel.refreshAll() }, enabled = !state.busy) {
                             Icon(Icons.Rounded.Refresh, contentDescription = stringResource(R.string.live_tv_refresh))
                         }
+                    }
+                    // Always there, as on NextPlayer's other main screens.
+                    IconButton(onClick = actions.openSettings) {
+                        Icon(NextIcons.Settings, contentDescription = stringResource(R.string.settings))
                     }
                 },
             )
