@@ -18,7 +18,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.List
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.ViewTimeline
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.LiveTv
 import androidx.compose.material.icons.rounded.Refresh
@@ -86,6 +88,14 @@ private fun LiveTvContent(state: LiveTvUiState, viewModel: LiveTvViewModel, acti
                 title = stringResource(R.string.live_tv),
                 fontWeight = FontWeight.Bold,
                 actions = {
+                    if (state.sources.isNotEmpty()) {
+                        IconButton(onClick = viewModel::toggleGuide) {
+                            Icon(
+                                if (state.showGuide) Icons.AutoMirrored.Rounded.List else Icons.Rounded.ViewTimeline,
+                                contentDescription = stringResource(if (state.showGuide) R.string.live_tv_show_list else R.string.live_tv_show_guide),
+                            )
+                        }
+                    }
                     state.sourceId?.let { id ->
                         IconButton(onClick = { actions.editSource(id) }) {
                             Icon(Icons.Rounded.Edit, contentDescription = stringResource(R.string.live_tv_edit_source))
@@ -168,6 +178,16 @@ private fun LiveTvContent(state: LiveTvUiState, viewModel: LiveTvViewModel, acti
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(24.dp),
                     )
+                }
+                if (state.showGuide) {
+                    GuideGrid(
+                        channels = state.channels,
+                        epg = state.epg,
+                        now = state.now,
+                        bottomPadding = 8.dp + bottomPadding,
+                        onPlay = { channel -> actions.play(channel, state.channels) },
+                    )
+                    return@Column
                 }
                 LazyColumn(
                     contentPadding = PaddingValues(start = 8.dp, end = 8.dp, top = 4.dp, bottom = 8.dp + bottomPadding),

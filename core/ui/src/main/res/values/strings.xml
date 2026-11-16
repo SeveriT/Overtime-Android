@@ -18,6 +18,10 @@
     <string name="app_name" translatable="false">Overtime</string>
     <string name="live_tv">Live TV</string>
     <string name="live_tv_refresh">Refresh channels and guide</string>
+    <string name="live_tv_show_guide">Programme guide</string>
+    <string name="live_tv_show_list">Channel list</string>
+    <string name="live_tv_no_guide">No guide for this channel</string>
+    <string name="live_tv_watch_channel">Watch %1$s</string>
     <string name="live_tv_edit_source">Edit source</string>
     <string name="live_tv_add_source">Add source</string>
     <string name="live_tv_add_a_source">Add a source</string>

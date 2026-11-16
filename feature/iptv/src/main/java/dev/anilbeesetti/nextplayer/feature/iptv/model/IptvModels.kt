@@ -66,6 +66,9 @@ data class EpgData(
         return EpgData(nameToId = other.nameToId + nameToId, programmes = merged)
     }
 
+    /** Every programme the guide has for [channel], by start time. */
+    fun programmesFor(channel: Channel): List<Programme> = resolveId(channel)?.let(programmes::get).orEmpty()
+
     /** What's on [channel] at [now] and what follows. */
     fun nowNext(channel: Channel, now: Long): Pair<Programme?, Programme?> {
         val list = resolveId(channel)?.let(programmes::get) ?: return null to null

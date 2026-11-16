@@ -34,6 +34,8 @@ data class LiveTvUiState(
     val epg: EpgData = EpgData(),
     val now: Long = System.currentTimeMillis(),
     val status: LiveTvStatus? = null,
+    /** The programme guide grid instead of the channel list. */
+    val showGuide: Boolean = false,
 ) {
     val busy: Boolean get() = status is LiveTvStatus.Loading
 }
@@ -50,7 +52,7 @@ class LiveTvViewModel(private val repository: IptvRepository) : ViewModel() {
     private val status = MutableStateFlow<LiveTvStatus?>(null)
     private val clock = MutableStateFlow(System.currentTimeMillis())
 
-    private data class Selection(val sourceId: String? = null, val group: String = GROUP_ALL, val query: String = "")
+    private data class Selection(val sourceId: String? = null, val group: String = GROUP_ALL, val query: String = "", val guide: Boolean = false)
 
     val state: StateFlow<LiveTvUiState> = combine(
         repository.sources,
@@ -81,6 +83,7 @@ class LiveTvViewModel(private val repository: IptvRepository) : ViewModel() {
             epg = sourceId?.let(epg::get) ?: EpgData(),
             now = now,
             status = st,
+            showGuide = sel.guide,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), LiveTvUiState())
 
@@ -100,7 +103,11 @@ class LiveTvViewModel(private val repository: IptvRepository) : ViewModel() {
     }
 
     fun selectSource(id: String) {
-        selection.value = Selection(sourceId = id)
+        selection.value = Selection(sourceId = id, guide = selection.value.guide)
+    }
+
+    fun toggleGuide() {
+        selection.value = selection.value.copy(guide = !selection.value.guide)
     }
 
     fun selectGroup(group: String) {
