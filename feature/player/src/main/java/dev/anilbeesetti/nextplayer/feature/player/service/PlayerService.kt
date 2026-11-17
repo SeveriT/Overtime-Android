@@ -36,6 +36,7 @@ import androidx.media3.session.SessionCommand
 import androidx.media3.session.SessionError
 import androidx.media3.session.SessionResult
 import androidx.media3.session.SizeLimitedBitmapLoader
+import androidx.media3.session.setPositionUpdateDelay
 import coil3.ImageLoader
 import coil3.request.ImageRequest
 import com.google.common.util.concurrent.Futures
@@ -1024,7 +1025,10 @@ class PlayerService : MediaSessionService() {
                             .build(),
                     ),
                 )
-            }.build()
+            }.build().also {
+                // Overtime: frequent position updates keep a rewound live bar steady (see the helper).
+                it.setPositionUpdateDelay(POSITION_UPDATE_DELAY_MS)
+            }
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -1419,6 +1423,9 @@ private val DecoderTrackType.mediaTrackType: Int
 
 private const val DECODER_LOG_TAG = "Decoder"
 private const val MAX_SESSION_ARTWORK_SIZE = 500
+
+/** Overtime: how often the session sends the position to the player screen (Media3 default 3 s). */
+private const val POSITION_UPDATE_DELAY_MS = 500L
 
 @get:UnstableApi
 @set:UnstableApi
