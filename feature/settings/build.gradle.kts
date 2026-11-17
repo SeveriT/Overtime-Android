@@ -38,6 +38,8 @@ kotlin {
 dependencies {
 
     implementation(project(":core:ui"))
+    // Overtime: Live TV favourites, Continue watching and IPTV sources are part of the backup.
+    implementation(project(":feature:iptv"))
     implementation(project(":core:data"))
     implementation(project(":core:domain"))
     implementation(project(":core:model"))

@@ -47,6 +47,7 @@ internal class SettingsBackupCodec(private val subtitleEncodings: Set<String>) {
         playerPreferences: PlayerPreferences,
         networkConnections: List<NetworkConnection>? = null,
         sshKeys: Map<String, String> = emptyMap(),
+        overtime: JsonObject? = null,
     ): String = buildJsonObject {
         put(
             "version",
@@ -74,6 +75,13 @@ internal class SettingsBackupCodec(private val subtitleEncodings: Set<String>) {
                 json.encodeToJsonElement(sshKeys),
             )
         }
+        // Overtime: Live TV favourites, Continue watching and (with credentials) IPTV sources.
+        if (overtime != null) {
+            put(
+                OVERTIME_KEY,
+                overtime,
+            )
+        }
     }.let {
         json.encodeToString(
             JsonObject.serializer(),
@@ -87,7 +95,8 @@ internal class SettingsBackupCodec(private val subtitleEncodings: Set<String>) {
         require(
             root["applicationPreferences"] is JsonObject ||
                 root["playerPreferences"] is JsonObject ||
-                root["networkConnections"] is JsonArray,
+                root["networkConnections"] is JsonArray ||
+                root[OVERTIME_KEY] is JsonObject,
         ) { "No supported settings found" }
         return root
     }
@@ -274,3 +283,6 @@ internal class SettingsBackupCodec(private val subtitleEncodings: Set<String>) {
     private fun JsonObject.string(name: String): String? =
         (get(name) as? JsonPrimitive)?.takeIf { it.isString }?.content
 }
+
+/** Overtime's own part of the backup (see IptvRepository.backup). */
+internal const val OVERTIME_KEY = "overtime"

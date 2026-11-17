@@ -10,6 +10,7 @@ import dev.anilbeesetti.nextplayer.core.media.network.keys.isValidSshPrivateKey
 import dev.anilbeesetti.nextplayer.core.model.NetworkAuthentication
 import dev.anilbeesetti.nextplayer.core.model.NetworkConnection
 import dev.anilbeesetti.nextplayer.core.ui.R
+import dev.anilbeesetti.nextplayer.feature.iptv.data.IptvRepository
 import java.io.ByteArrayOutputStream
 import java.io.File
 import kotlinx.coroutines.Dispatchers
@@ -17,6 +18,7 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.serialization.json.JsonObject
 import org.koin.core.annotation.Single
 
 @Single
@@ -25,6 +27,7 @@ class SettingsBackupService(
     private val preferencesRepository: PreferencesRepository,
     private val networkConnectionRepository: NetworkConnectionRepository,
     private val sshKeyStore: SshKeyStore,
+    private val iptvRepository: IptvRepository,
 ) {
     private val codec = SettingsBackupCodec(
         subtitleEncodings = context.resources.getStringArray(R.array.charsets_list).map {
@@ -59,6 +62,8 @@ class SettingsBackupService(
                 playerPreferences = preferencesRepository.playerPreferences.value,
                 networkConnections = connections,
                 sshKeys = keys,
+                // Sources hold playlist addresses and logins: only with the credentials.
+                overtime = iptvRepository.backup(includeSources = includeNetworkConnections),
             ).toByteArray(Charsets.UTF_8)
             require(bytes.size <= MAX_BACKUP_BYTES)
             checkNotNull(
@@ -107,6 +112,7 @@ class SettingsBackupService(
                 existingConnections,
             )
         }
+        (codec.parse(content)[OVERTIME_KEY] as? JsonObject)?.let(iptvRepository::restore)
         preferencesRepository.updateApplicationPreferences { imported.applicationPreferences }
         preferencesRepository.updatePlayerPreferences { imported.playerPreferences }
         // Preference data sources log storage failures; do not report an import that did not persist.

@@ -16,17 +16,23 @@ import java.io.File
 import java.io.IOException
 import java.util.UUID
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.SetSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.koin.core.annotation.Single
@@ -171,6 +177,180 @@ class IptvRepository(context: Context) {
                 _dismissed.value,
             ),
         )
+    }
+
+    // ---- settings backup (export / import in Settings) ---------------------------------
+
+    /** Downloads channels and guides for sources restored from a backup. */
+    private val backgroundScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    /**
+     * Overtime's part of the settings backup: favourite channels and groups, and Continue watching.
+     * With [includeSources], also the sources, whose addresses and logins are credentials.
+     */
+    fun backup(includeSources: Boolean): JsonObject {
+        val strings = SetSerializer(String.serializer())
+        return buildJsonObject {
+            put(
+                BACKUP_VERSION_KEY,
+                JsonPrimitive(1),
+            )
+            if (includeSources) {
+                put(
+                    BACKUP_SOURCES,
+                    json.encodeToJsonElement(
+                        ListSerializer(IptvSource.serializer()),
+                        _sources.value,
+                    ),
+                )
+            }
+            put(
+                BACKUP_FAVORITES,
+                json.encodeToJsonElement(
+                    strings,
+                    _favorites.value,
+                ),
+            )
+            put(
+                BACKUP_FAVORITE_GROUPS,
+                json.encodeToJsonElement(
+                    strings,
+                    _favoriteGroups.value,
+                ),
+            )
+            put(
+                BACKUP_WATCHING,
+                json.encodeToJsonElement(
+                    ListSerializer(WatchEntry.serializer()),
+                    _watching.value,
+                ),
+            )
+            put(
+                BACKUP_DISMISSED,
+                json.encodeToJsonElement(
+                    MapSerializer(
+                        String.serializer(),
+                        Long.serializer(),
+                    ),
+                    _dismissed.value,
+                ),
+            )
+        }
+    }
+
+    /**
+     * Restores [backup] (from [backup]) into what's here: sources are added or replaced by id (and
+     * their channels and guides fetched in the background), favourites are added, and Continue
+     * watching keeps the newer of each entry. Parts missing from the backup are left alone.
+     */
+    @Synchronized
+    fun restore(backup: JsonObject) {
+        fun <T> part(key: String, serializer: kotlinx.serialization.KSerializer<T>): T? =
+            backup[key]?.let {
+                runCatching {
+                    json.decodeFromJsonElement(
+                        serializer,
+                        it,
+                    )
+                }.getOrNull()
+            }
+
+        part(
+            BACKUP_SOURCES,
+            ListSerializer(IptvSource.serializer()),
+        )?.let { imported ->
+            val byId = imported.associateBy { it.id }
+            val merged =
+                _sources.value.map { byId[it.id] ?: it } +
+                    imported.filter { new -> _sources.value.none { it.id == new.id } }
+            _sources.value = merged
+            writeList(
+                SOURCES,
+                ListSerializer(IptvSource.serializer()),
+                merged,
+            )
+            imported.forEach { source ->
+                backgroundScope.launch {
+                    runCatching { refreshChannels(source) }
+                    runCatching {
+                        refreshGuide(
+                            source,
+                            maxAgeMs = 0,
+                        )
+                    }
+                }
+            }
+        }
+        val strings = SetSerializer(String.serializer())
+        part(
+            BACKUP_FAVORITES,
+            strings,
+        )?.let { imported ->
+            _favorites.update { it + imported }
+            File(
+                dir,
+                FAVORITES,
+            ).writeText(
+                json.encodeToString(
+                    strings,
+                    _favorites.value,
+                ),
+            )
+        }
+        part(
+            BACKUP_FAVORITE_GROUPS,
+            strings,
+        )?.let { imported ->
+            _favoriteGroups.update { it + imported }
+            File(
+                dir,
+                FAVORITE_GROUPS,
+            ).writeText(
+                json.encodeToString(
+                    strings,
+                    _favoriteGroups.value,
+                ),
+            )
+        }
+        part(
+            BACKUP_WATCHING,
+            ListSerializer(WatchEntry.serializer()),
+        )?.let { imported ->
+            val mine = _watching.value.associateBy { it.url }
+            val newer = imported.filter { (mine[it.url]?.playedAt ?: -1L) < it.playedAt }
+            val urls = newer.mapTo(HashSet()) { it.url }
+            val list = (_watching.value.filterNot { it.url in urls } + newer).takeLast(MAX_WATCHING)
+            _watching.value = list
+            writeList(
+                WATCHING,
+                ListSerializer(WatchEntry.serializer()),
+                list,
+            )
+        }
+        part(
+            BACKUP_DISMISSED,
+            MapSerializer(
+                String.serializer(),
+                Long.serializer(),
+            ),
+        )?.let { imported ->
+            _dismissed.update { current ->
+                current +
+                    imported.filter { (key, at) -> at > (current[key] ?: 0L) }
+            }
+            File(
+                dir,
+                DISMISSED,
+            ).writeText(
+                json.encodeToString(
+                    MapSerializer(
+                        String.serializer(),
+                        Long.serializer(),
+                    ),
+                    _dismissed.value,
+                ),
+            )
+        }
     }
 
     fun newSourceId(): String = UUID.randomUUID().toString().take(8)
@@ -518,6 +698,14 @@ class IptvRepository(context: Context) {
         private const val FAVORITE_GROUPS = "favorite_groups.json"
         private const val WATCHING = "watching.json"
         private const val DISMISSED = "watching_dismissed.json"
+
+        // Keys of Overtime's part of the settings backup.
+        private const val BACKUP_VERSION_KEY = "version"
+        private const val BACKUP_SOURCES = "sources"
+        private const val BACKUP_FAVORITES = "favoriteChannels"
+        private const val BACKUP_FAVORITE_GROUPS = "favoriteGroups"
+        private const val BACKUP_WATCHING = "continueWatching"
+        private const val BACKUP_DISMISSED = "continueWatchingDismissed"
 
         /** Remembered movies and episodes; the oldest are forgotten past this. */
         private const val MAX_WATCHING = 3_000
