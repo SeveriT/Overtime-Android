@@ -1,6 +1,7 @@
 package dev.anilbeesetti.nextplayer.feature.player.timeshift
 
 import android.net.Uri
+import android.util.Log
 import androidx.media3.common.C
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.BaseDataSource
@@ -66,6 +67,10 @@ class TimeshiftDataSource(
         }
         if (session.startOffset < 0) session.startAt(session.newestWall)
         offset = session.startOffset + dataSpec.position
+        Log.d(
+            "Timeshift",
+            "open at ${(rec.liveWall - session.startWall) / 1000.0} s behind live (+${dataSpec.position} bytes)",
+        )
         opened = true
         transferStarted(dataSpec)
         return C.LENGTH_UNSET.toLong()

@@ -2,6 +2,7 @@ package dev.anilbeesetti.nextplayer.feature.player.timeshift
 
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import androidx.media3.common.ForwardingPlayer
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
@@ -258,6 +259,11 @@ class TimeshiftPlayer(private val player: Player, private val timeshift: Timeshi
             wall,
             if (preferLater) Snap.LATER else Snap.NEAREST,
         )
+        Log.d(
+            TAG,
+            "seek: target ${(session.recorder.liveWall - wall) / 1000.0} s behind live, " +
+                "keyframe ${(session.recorder.liveWall - session.startWall) / 1000.0} s behind",
+        )
         // Unseekable live progressive media restarts reading when sent to 0: see TimeshiftDataSource.
         player.seekTo(
             player.currentMediaItemIndex,
@@ -417,6 +423,7 @@ class TimeshiftPlayer(private val player: Player, private val timeshift: Timeshi
     }
 
     private companion object {
+        const val TAG = "Timeshift"
         const val TICK_MS = 500L
 
         /** A seek is carried out once no other has come in for this long. */

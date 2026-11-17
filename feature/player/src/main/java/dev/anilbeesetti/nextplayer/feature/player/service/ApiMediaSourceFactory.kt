@@ -8,9 +8,9 @@ import androidx.media3.datasource.DataSpec
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
-import androidx.media3.extractor.DefaultExtractorsFactory
 import dev.anilbeesetti.nextplayer.feature.player.timeshift.Timeshift
 import dev.anilbeesetti.nextplayer.feature.player.timeshift.TimeshiftDataSource
+import dev.anilbeesetti.nextplayer.feature.player.timeshift.TimeshiftExtractorsFactory
 import dev.anilbeesetti.nextplayer.feature.player.utils.apiHeaders
 import dev.anilbeesetti.nextplayer.feature.player.utils.isApiLive
 import io.github.anilbeesetti.nextlib.media3ext.ffdecoder.FfmpegSubtitleExtractorsFactory
@@ -36,7 +36,7 @@ internal class ApiMediaSourceFactory(
                     timeshift,
                     mediaItem.apiHeaders,
                 ),
-                DefaultExtractorsFactory(),
+                TimeshiftExtractorsFactory(),
             ).createMediaSource(mediaItem)
         }
         val sources = RequestHeadersDataSourceFactory(
