@@ -10,6 +10,7 @@ import androidx.media3.common.Player
 import androidx.media3.common.Timeline
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.source.ForwardingTimeline
+import dev.anilbeesetti.nextplayer.feature.player.utils.isOvertimeIptv
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Proxy
@@ -84,6 +85,16 @@ class TimeshiftPlayer(private val player: Player, private val timeshift: Timeshi
                     // Another channel or a video: stop recording the old one.
                     pendingWall = null
                     main.removeCallbacks(applySeek)
+                    // Live TV and Movies & series hide repeat and shuffle, so they must not stay on
+                    // from the user's own videos (an episode would loop instead of moving on).
+                    if (mediaItem?.isOvertimeIptv == true) {
+                        if (player.repeatMode !=
+                            REPEAT_MODE_OFF
+                        ) {
+                            player.repeatMode = REPEAT_MODE_OFF
+                        }
+                        if (player.shuffleModeEnabled) player.shuffleModeEnabled = false
+                    }
                     val session = timeshift.session ?: return
                     if (mediaItem?.localConfiguration?.uri?.toString() !=
                         session.uri

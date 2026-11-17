@@ -159,6 +159,13 @@ class PlayerApi(private val intent: Intent) {
                                     true,
                                 )
                             }
+                            // Overtime: a movie or episode from Movies & series.
+                            if (boolean(API_VOD) == true) {
+                                putBoolean(
+                                    API_VOD_KEY,
+                                    true,
+                                )
+                            }
                             if (index == selectedIndex &&
                                 hasPosition
                             ) {
@@ -244,6 +251,9 @@ class PlayerApi(private val intent: Intent) {
 
         /** Overtime: the playlist is live TV channels (recorded for live rewind). */
         const val API_LIVE = "overtime.live"
+
+        /** Overtime: the playlist is a movie, or episodes of a series, from Movies & series. */
+        const val API_VOD = "overtime.vod"
         const val API_RESULT_INTENT = "com.mxtech.intent.result.VIEW"
 
         private val ORIENTATIONS = setOf(
@@ -273,6 +283,7 @@ class PlayerApi(private val intent: Intent) {
             "video",
             "headers",
             API_LIVE,
+            API_VOD,
             "video_zoom",
             "sticky",
             "orientation",
@@ -288,6 +299,15 @@ class PlayerApi(private val intent: Intent) {
 private const val API_HEADERS_KEY = "dev.anilbeesetti.nextplayer.api.HEADERS"
 private const val API_POSITION_KEY = "dev.anilbeesetti.nextplayer.api.POSITION"
 private const val API_LIVE_KEY = "dev.anilbeesetti.nextplayer.api.LIVE"
+private const val API_VOD_KEY = "dev.anilbeesetti.nextplayer.api.VOD"
+
+/** Overtime: a movie or episode from Movies & series. */
+internal val MediaItem.isApiVod: Boolean
+    get() = requestMetadata.extras?.getBoolean(API_VOD_KEY) == true
+
+/** Overtime: anything from Live TV or Movies & series (no repeat or shuffle). */
+internal val MediaItem.isOvertimeIptv: Boolean
+    get() = isApiLive || isApiVod
 
 /** A live TV channel from Overtime: played through the live rewind recorder. */
 internal val MediaItem.isApiLive: Boolean

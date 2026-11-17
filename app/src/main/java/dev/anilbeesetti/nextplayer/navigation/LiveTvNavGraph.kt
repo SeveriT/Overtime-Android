@@ -112,6 +112,11 @@ internal fun Context.playQueue(items: List<PlayableItem>) {
             "video_list.name",
             items.map { it.title }.toTypedArray(),
         )
+        // A movie or episodes: the player hides repeat and shuffle.
+        putExtra(
+            PlayerApi.API_VOD,
+            true,
+        )
     }
     startActivity(intent)
 }

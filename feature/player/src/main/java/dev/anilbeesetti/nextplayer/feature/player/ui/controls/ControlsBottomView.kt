@@ -61,6 +61,7 @@ import dev.anilbeesetti.nextplayer.feature.player.state.ChaptersState
 import dev.anilbeesetti.nextplayer.feature.player.state.rememberChaptersState
 import dev.anilbeesetti.nextplayer.feature.player.ui.preview.rememberPreviewPlayer
 import dev.anilbeesetti.nextplayer.feature.player.ui.titleOrDefault
+import dev.anilbeesetti.nextplayer.feature.player.utils.isOvertimeIptv
 
 private const val MILLISECONDS_PER_SECOND = 1_000L
 
@@ -265,11 +266,13 @@ fun ControlsBottomView(
                         contentDescription = null,
                     )
                 }
-                // Overtime: repeat and shuffle mean nothing for a live channel (live, or rewindable live).
+                // Overtime: repeat and shuffle mean nothing for a live channel (live, or rewindable live),
+                // and only get in the way for a movie or an episode from Movies & series.
                 val isLiveChannel =
                     player?.isCurrentMediaItemLive == true ||
                         player?.isCurrentMediaItemDynamic == true
-                if (!isLiveChannel) {
+                val isIptv = player?.currentMediaItem?.isOvertimeIptv == true
+                if (!isLiveChannel && !isIptv) {
                     LoopButton(player = player)
                     ShuffleButton(player = player)
                 }
