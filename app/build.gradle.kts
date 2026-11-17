@@ -37,6 +37,22 @@ android {
         targetCompatibility = JavaVersion.toVersion(libs.versions.android.jvm.get().toInt())
     }
 
+    // Overtime's own release key. The key file and its password stay out of the repository: they are
+    // set in ~/.gradle/gradle.properties (overtime.signing.storeFile, .storePassword, .keyAlias).
+    fun signingProperty(name: String): String? =
+        providers.gradleProperty("overtime.signing.$name").orNull
+    val overtimeKeyFile = signingProperty("storeFile")
+    signingConfigs {
+        if (overtimeKeyFile != null) {
+            create("overtime") {
+                storeFile = file(overtimeKeyFile)
+                storePassword = signingProperty("storePassword")
+                keyAlias = signingProperty("keyAlias") ?: "overtime"
+                keyPassword = signingProperty("keyPassword") ?: storePassword
+            }
+        }
+    }
+
     buildTypes {
         getByName("release") {
             isMinifyEnabled = true
@@ -45,7 +61,13 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-            signingConfig = signingConfigs.getByName("debug")
+            // The shared Next Player test key (app/debug.keystore) is only a stand-in for local builds:
+            // never publish an APK signed with it.
+            val overtimeKey = signingConfigs.findByName("overtime")
+            if (overtimeKey == null) {
+                logger.warn("Overtime release key not set up: signing with the shared test key")
+            }
+            signingConfig = overtimeKey ?: signingConfigs.getByName("debug")
         }
 
         getByName("debug") {
