@@ -520,8 +520,9 @@ private fun ChipRow(
     }
 }
 
+/** A channel in a list: also used by the player's channel list, which highlights the one playing. */
 @Composable
-private fun ChannelRow(
+internal fun ChannelRow(
     channel: Channel,
     now: String?,
     next: String?,
@@ -529,11 +530,21 @@ private fun ChannelRow(
     favorite: Boolean,
     onClick: () -> Unit,
     onToggleFavorite: () -> Unit,
+    selected: Boolean = false,
 ) {
     Row(
         Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
+            .background(
+                if (selected) {
+                    MaterialTheme.colorScheme.primaryContainer.copy(
+                        alpha = 0.4f,
+                    )
+                } else {
+                    Color.Transparent
+                },
+            )
             .clickable(onClick = onClick)
             .padding(
                 horizontal = 8.dp,
@@ -557,6 +568,7 @@ private fun ChannelRow(
             Text(
                 channel.name,
                 style = MaterialTheme.typography.titleMedium,
+                color = if (selected) MaterialTheme.colorScheme.primary else Color.Unspecified,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -646,7 +658,7 @@ private fun EmptyState(onAdd: () -> Unit) {
     }
 }
 
-private fun formatClock(millis: Long): String = SimpleDateFormat(
+internal fun formatClock(millis: Long): String = SimpleDateFormat(
     "HH:mm",
     Locale.getDefault(),
 ).format(Date(millis))

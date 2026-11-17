@@ -54,7 +54,10 @@ import dev.anilbeesetti.nextplayer.core.common.Utils
 import dev.anilbeesetti.nextplayer.core.ui.R
 import dev.anilbeesetti.nextplayer.core.ui.components.NextSegmentedListItem
 import dev.anilbeesetti.nextplayer.core.ui.designsystem.NextIcons
+import dev.anilbeesetti.nextplayer.feature.iptv.screens.livetv.PlayerChannelList
+import dev.anilbeesetti.nextplayer.feature.iptv.screens.livetv.QueuedChannel
 import dev.anilbeesetti.nextplayer.feature.player.state.rememberPlaylistState
+import dev.anilbeesetti.nextplayer.feature.player.utils.isApiLive
 import sh.calvin.reorderable.DragGestureDetector
 import sh.calvin.reorderable.ReorderableCollectionItemScope
 import sh.calvin.reorderable.ReorderableItem
@@ -83,6 +86,41 @@ fun BoxScope.PlaylistView(modifier: Modifier = Modifier, show: Boolean, player: 
                 lazyListState.scrollToItem(index = currentIndex)
             }
         }
+    }
+
+    // Overtime: live TV shows its channels like the Live TV screen instead of a reorderable queue.
+    val isLiveTv = playlistState.mediaItemCount > 0 &&
+        playlistState.getMediaItemAt(
+            index = playlistState.currentMediaItemIndex.coerceIn(
+                0,
+                playlistState.mediaItemCount - 1,
+            ),
+        ).isApiLive
+    if (isLiveTv) {
+        OverlayView(
+            modifier = modifier,
+            show = show,
+            title = stringResource(R.string.player_channels),
+        ) {
+            if (show) {
+                val channels = remember(playlistState.timeline) {
+                    (0 until playlistState.mediaItemCount).map { index ->
+                        val item = playlistState.getMediaItemAt(index = index)
+                        QueuedChannel(
+                            url = item.mediaId,
+                            title = item.mediaMetadata.title?.toString().orEmpty(),
+                        )
+                    }
+                }
+                PlayerChannelList(
+                    channels = channels,
+                    currentIndex = playlistState.currentMediaItemIndex,
+                    onSelect = { playlistState.seekToItem(index = it) },
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+        }
+        return
     }
 
     OverlayView(

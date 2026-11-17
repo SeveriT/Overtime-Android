@@ -316,8 +316,3 @@ private fun GuideRow(
         }
     }
 }
-
-private fun formatClock(millis: Long): String = SimpleDateFormat(
-    "HH:mm",
-    Locale.getDefault(),
-).format(Date(millis))

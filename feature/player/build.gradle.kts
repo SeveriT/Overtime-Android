@@ -39,6 +39,8 @@ kotlin {
 dependencies {
 
     implementation(project(":core:common"))
+    // Overtime: the channel list for live TV comes from the IPTV module.
+    implementation(project(":feature:iptv"))
     implementation(project(":core:ui"))
     implementation(project(":core:data"))
     implementation(project(":core:domain"))
