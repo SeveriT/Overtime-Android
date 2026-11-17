@@ -147,15 +147,33 @@ class TimeshiftPlayer(private val player: Player, private val timeshift: Timeshi
                 dataEdge + rec.edgeStepMs,
             ),
         )
-        val playhead = pendingWall ?: (session.startWall + player.currentPosition)
+        val pending = pendingWall
+        val playhead = pending ?: (session.startWall + player.currentPosition)
+        // Live playback sits a cushion (plus up to a keyframe interval) behind the edge so it never runs
+        // dry; within that, show the knob at the end, as the Windows app does.
+        val atLive = pending == null && b.live - playhead <= liveTolerance(session)
         return Window(
             b.origin,
             b.live,
-            playhead.coerceIn(
-                b.origin,
-                b.live,
-            ),
+            if (atLive) {
+                b.live
+            } else {
+                playhead.coerceIn(
+                    b.origin,
+                    b.live,
+                )
+            },
         )
+    }
+
+    /** How far behind the edge still counts as live (same sum as the Windows app's rewind bar). */
+    private fun liveTolerance(session: Timeshift.Session): Long {
+        val rec = session.recorder
+        return max(
+            session.cushionMs,
+            rec.liveDelayMs,
+        ) + LIVE_SLACK_MS + rec.edgeStepMs +
+            rec.keyframeIntervalMs.coerceAtMost(MAX_KEYFRAME_SLACK_MS)
     }
 
     override fun getDuration(): Long = active()?.let {
@@ -425,6 +443,12 @@ class TimeshiftPlayer(private val player: Player, private val timeshift: Timeshi
     private companion object {
         const val TAG = "Timeshift"
         const val TICK_MS = 500L
+
+        /** Extra room for live: network jitter and the player's own buffer (as on Windows). */
+        const val LIVE_SLACK_MS = 4_000L
+
+        /** A keyframe interval counts towards live up to this much. */
+        const val MAX_KEYFRAME_SLACK_MS = 10_000L
 
         /** A seek is carried out once no other has come in for this long. */
         const val SEEK_SETTLE_MS = 300L
