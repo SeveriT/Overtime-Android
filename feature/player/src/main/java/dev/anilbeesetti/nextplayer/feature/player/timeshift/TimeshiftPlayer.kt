@@ -90,13 +90,12 @@ class TimeshiftPlayer(
                     // Another channel or a video: stop recording the old one.
                     pendingWall = null
                     main.removeCallbacks(applySeek)
-                    // Live TV and Movies & series hide repeat and shuffle, so they must not stay on
-                    // from the user's own videos (an episode would loop instead of moving on).
-                    if (mediaItem?.isApiLive ==
-                        true
-                    ) {
+                    // The last live channel watched, for Live TV's resume button (zapping counts too).
+                    if (mediaItem?.isApiLive == true) {
                         mediaItem.localConfiguration?.uri?.toString()?.let(onLiveChannel)
                     }
+                    // Live TV and Movies & series hide repeat and shuffle, so they must not stay on
+                    // from the user's own videos (an episode would loop instead of moving on).
                     if (mediaItem?.isOvertimeIptv == true) {
                         if (player.repeatMode !=
                             REPEAT_MODE_OFF
