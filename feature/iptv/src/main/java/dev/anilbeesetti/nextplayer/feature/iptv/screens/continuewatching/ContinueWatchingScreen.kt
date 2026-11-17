@@ -52,8 +52,10 @@ import androidx.lifecycle.viewModelScope
 import coil3.compose.AsyncImage
 import dev.anilbeesetti.nextplayer.core.database.dao.MediumStateDao
 import dev.anilbeesetti.nextplayer.core.ui.R
+import dev.anilbeesetti.nextplayer.core.ui.components.BindTopLevelFab
 import dev.anilbeesetti.nextplayer.core.ui.components.LocalNavigationBottomPadding
 import dev.anilbeesetti.nextplayer.core.ui.components.NextTopAppBar
+import dev.anilbeesetti.nextplayer.core.ui.components.TopLevelFabKey
 import dev.anilbeesetti.nextplayer.core.ui.designsystem.NextIcons
 import dev.anilbeesetti.nextplayer.feature.iptv.data.IptvRepository
 import dev.anilbeesetti.nextplayer.feature.iptv.model.ContinueItem
@@ -134,6 +136,11 @@ fun ContinueWatchingScreen(
 ) {
     val items by viewModel.items.collectAsStateWithLifecycle()
     val bottomPadding = LocalNavigationBottomPadding.current
+    BindTopLevelFab(
+        key = TopLevelFabKey.CONTINUE,
+        icon = NextIcons.Settings,
+        onClick = onSettings,
+    )
     Scaffold(
         topBar = {
             NextTopAppBar(

@@ -134,11 +134,13 @@ enum class TopLevelDestination(
         LibraryRoute,
         NextIcons.VideoLibrary,
         R.string.library_title,
+        TopLevelFabKey.LIBRARY,
     ),
     CONTINUE(
         ContinueWatchingRoute,
         NextIcons.ContinueWatching,
         R.string.continue_watching_nav,
+        TopLevelFabKey.CONTINUE,
     ),
     MORE(
         MoreRoute,
@@ -473,8 +475,10 @@ fun NextNavigationBar(
                         },
                     shape = MaterialTheme.shapes.large,
                 ) {
+                    // Overtime: animate only when the icon changes; tabs with the same button
+                    // (Settings on several) would otherwise swap the gear for itself.
                     AnimatedContent(
-                        targetState = fab,
+                        targetState = fab.icon,
                         transitionSpec = {
                             fadeIn(
                                 animationSpec = tween(
@@ -504,9 +508,9 @@ fun NextNavigationBar(
                                 )
                         },
                         label = "fab_icon_swap",
-                    ) { fab ->
+                    ) { icon ->
                         Icon(
-                            imageVector = fab.icon,
+                            imageVector = icon,
                             contentDescription = null,
                         )
                     }

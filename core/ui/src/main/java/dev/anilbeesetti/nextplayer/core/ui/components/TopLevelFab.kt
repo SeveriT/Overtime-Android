@@ -13,6 +13,8 @@ object TopLevelFabKey {
     const val PLAYLISTS = "playlists"
     const val NETWORK = "network"
     const val MORE = "more"
+    const val LIBRARY = "library"
+    const val CONTINUE = "continue"
 }
 
 data class TopLevelFabState(

@@ -58,8 +58,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import dev.anilbeesetti.nextplayer.core.ui.R
+import dev.anilbeesetti.nextplayer.core.ui.components.BindTopLevelFab
 import dev.anilbeesetti.nextplayer.core.ui.components.LocalNavigationBottomPadding
 import dev.anilbeesetti.nextplayer.core.ui.components.NextTopAppBar
+import dev.anilbeesetti.nextplayer.core.ui.components.TopLevelFabKey
 import dev.anilbeesetti.nextplayer.core.ui.designsystem.NextIcons
 import dev.anilbeesetti.nextplayer.feature.iptv.model.LibraryItem
 import dev.anilbeesetti.nextplayer.feature.iptv.model.LibraryKind
@@ -74,6 +76,11 @@ fun LibraryScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val bottomPadding = LocalNavigationBottomPadding.current
+    BindTopLevelFab(
+        key = TopLevelFabKey.LIBRARY,
+        icon = NextIcons.Settings,
+        onClick = onSettings,
+    )
     // A tab of its own now: sources added in Live TV meanwhile show up when it's opened again.
     LaunchedEffect(Unit) { viewModel.reloadSources() }
     Scaffold(

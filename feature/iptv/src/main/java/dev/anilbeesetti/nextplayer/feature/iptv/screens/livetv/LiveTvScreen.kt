@@ -94,18 +94,26 @@ private fun LiveTvContent(
     viewModel: LiveTvViewModel,
     actions: LiveTvActions,
 ) {
-    // Resume the channel watched last (sources are added from the Sources list or the empty screen).
+    // Resume the channel watched last (sources are added from the Sources list or the empty screen);
+    // before any channel was watched, Settings like the other tabs.
     val last by viewModel.lastChannel.collectAsStateWithLifecycle()
-    last?.let { (channel, group) ->
+    val resume = last
+    if (resume != null) {
         BindTopLevelFab(
             key = TopLevelFabKey.LIVE_TV,
             icon = NextIcons.Play,
             onClick = {
                 actions.play(
-                    channel,
-                    group,
+                    resume.first,
+                    resume.second,
                 )
             },
+        )
+    } else {
+        BindTopLevelFab(
+            key = TopLevelFabKey.LIVE_TV,
+            icon = NextIcons.Settings,
+            onClick = actions.openSettings,
         )
     }
     val bottomPadding = LocalNavigationBottomPadding.current

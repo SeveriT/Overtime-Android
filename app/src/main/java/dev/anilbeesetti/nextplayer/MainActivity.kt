@@ -319,23 +319,13 @@ fun NavigationLayout(
     val showNavigation =
         state.currentStack.lastOrNull()?.let { state.topLevelContentKeys.contains(element = it) } ==
             true
-    val selectedFabKey = state.destinations[state.selectedIndex].fabKey
-    val selectedFabState = selectedFabKey?.let(block = fabStates::get)
-    // Overtime: a tab shows only its own button. The last one was kept while a tab had none, so
-    // Movies & series and Continue showed Live TV's or More's; it's still kept while the same tab
-    // is binding its button again, so that doesn't flicker.
-    var displayedFab by remember { mutableStateOf<Pair<String, TopLevelFabState>?>(value = null) }
-    LaunchedEffect(
-        selectedFabKey,
-        selectedFabState,
-    ) {
-        displayedFab = when {
-            selectedFabKey != null && selectedFabState != null -> selectedFabKey to selectedFabState
-            displayedFab?.first == selectedFabKey -> displayedFab
-            else -> null
-        }
-    }
-    val displayedFabState = displayedFab?.second
+    // Every tab has its own button; the shown one is kept until the next tab has bound its own, so
+    // the bar (tabs and button in one centred row) doesn't jump while switching.
+    val selectedFabState = state.destinations[state.selectedIndex].fabKey?.let(
+        block = fabStates::get,
+    )
+    var displayedFabState by remember { mutableStateOf<TopLevelFabState?>(value = null) }
+    LaunchedEffect(key1 = selectedFabState) { selectedFabState?.let { displayedFabState = it } }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
