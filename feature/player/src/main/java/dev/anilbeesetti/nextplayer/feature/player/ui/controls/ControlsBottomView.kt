@@ -49,6 +49,7 @@ import dev.anilbeesetti.nextplayer.core.model.VideoContentScale
 import dev.anilbeesetti.nextplayer.core.ui.R
 import dev.anilbeesetti.nextplayer.core.ui.extensions.copy
 import dev.anilbeesetti.nextplayer.core.ui.theme.NextPlayerTheme
+import dev.anilbeesetti.nextplayer.feature.player.buttons.LiveButton
 import dev.anilbeesetti.nextplayer.feature.player.buttons.LoopButton
 import dev.anilbeesetti.nextplayer.feature.player.buttons.PlaybackSpeedButton
 import dev.anilbeesetti.nextplayer.feature.player.buttons.PlayerButton
@@ -203,6 +204,10 @@ fun ControlsBottomView(
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
+                        LiveButton(
+                            player = player,
+                            progressState = progressState,
+                        )
                         PlaybackSpeedButton(
                             player = player,
                             onClick = onPlaybackSpeedClick,
@@ -263,6 +268,10 @@ fun ControlsBottomView(
                 LoopButton(player = player)
                 ShuffleButton(player = player)
                 if (useCompactControls) {
+                    LiveButton(
+                        player = player,
+                        progressState = progressState,
+                    )
                     PlaybackSpeedButton(
                         player = player,
                         onClick = onPlaybackSpeedClick,

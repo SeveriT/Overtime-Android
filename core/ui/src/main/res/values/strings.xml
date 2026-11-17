@@ -59,6 +59,8 @@
     <string name="iptv_edit_source">Edit source</string>
     <string name="iptv_sources">Sources</string>
     <string name="iptv_reorder">Drag to reorder</string>
+    <string name="player_live">LIVE</string>
+    <string name="player_go_live">Back to live</string>
     <string name="continue_watching">Continue watching</string>
     <string name="continue_watching_nav">Continue</string>
     <string name="continue_watching_empty">Movies and episodes you start in Movies &amp; series show up here.</string>
