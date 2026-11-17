@@ -9,6 +9,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -68,6 +69,7 @@ import dev.anilbeesetti.nextplayer.core.ui.components.tvListFocus
 import dev.anilbeesetti.nextplayer.core.ui.designsystem.NextIcons
 import kotlinx.coroutines.launch
 
+// Overtime is built on Next Player (GPL-3.0): the GitHub button and donations go to its project.
 private const val GITHUB_URL = "https://github.com/anilbeesetti/nextplayer"
 private const val GITHUB_SPONSORS_URL = "https://github.com/sponsors/anilbeesetti"
 private const val KOFI_URL = "https://ko-fi.com/anilbeesetti"
@@ -138,7 +140,7 @@ private fun AboutPreferencesScreenContent(
                 },
                 onLibrariesClick = { onAction(AboutPreferencesAction.OpenLibraries) },
             )
-            ListSectionTitle(text = stringResource(id = R.string.donate))
+            ListSectionTitle(text = stringResource(id = R.string.about_support_next_player))
             Column(
                 verticalArrangement = Arrangement.spacedBy(ListItemDefaults.SegmentedGap),
             ) {
@@ -311,6 +313,13 @@ fun AboutApp(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
+                // Credit for the original app; opens its project page.
+                Text(
+                    text = stringResource(R.string.about_based_on),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(top = 4.dp).clickable(onClick = onGithubClick),
+                )
             }
         }
 

@@ -185,7 +185,7 @@ private fun GeneralPreferencesScreenContent(
                             "yyyyMMdd-HHmmss-SSS",
                             Locale.ROOT,
                         ).format(Date())
-                        exportDocument.launch("nextplayer-settings-$timestamp.json")
+                        exportDocument.launch("overtime-settings-$timestamp.json")
                     },
                 )
 
