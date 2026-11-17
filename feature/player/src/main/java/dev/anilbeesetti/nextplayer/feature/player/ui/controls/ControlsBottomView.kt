@@ -265,8 +265,14 @@ fun ControlsBottomView(
                         contentDescription = null,
                     )
                 }
-                LoopButton(player = player)
-                ShuffleButton(player = player)
+                // Overtime: repeat and shuffle mean nothing for a live channel (live, or rewindable live).
+                val isLiveChannel =
+                    player?.isCurrentMediaItemLive == true ||
+                        player?.isCurrentMediaItemDynamic == true
+                if (!isLiveChannel) {
+                    LoopButton(player = player)
+                    ShuffleButton(player = player)
+                }
                 if (useCompactControls) {
                     LiveButton(
                         player = player,
