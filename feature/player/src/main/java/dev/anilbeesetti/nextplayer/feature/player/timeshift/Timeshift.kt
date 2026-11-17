@@ -30,8 +30,8 @@ class Timeshift(private val root: File, private val bufferMs: Long = BUFFER_MS) 
             recorder.liveDelayMs,
         )
 
-        /** Points the next read at [wall]: the keyframe before it (or after it, with [preferLater]). */
-        fun startAt(wall: Long, preferLater: Boolean = false) {
+        /** Points the next read at a keyframe for [wall]: the one before it, after it, or the nearer one. */
+        fun startAt(wall: Long, snap: Snap = Snap.EARLIER) {
             val rec = recorder
             val newest = newestWall
             val target = wall.coerceIn(
@@ -41,11 +41,38 @@ class Timeshift(private val root: File, private val bufferMs: Long = BUFFER_MS) 
                     newest,
                 ),
             )
-            val offset = rec.keyframeNear(
-                rec.offsetAt(target),
-                preferLater,
-                limit = rec.offsetAt(newest),
+            val at = rec.offsetAt(target)
+            val limit = rec.offsetAt(newest)
+            val earlier = rec.keyframeNear(
+                at,
+                preferLater = false,
+                limit = limit,
             )
+            val offset = when (snap) {
+                Snap.EARLIER -> earlier
+
+                Snap.LATER -> rec.keyframeNear(
+                    at,
+                    preferLater = true,
+                    limit = limit,
+                )
+
+                Snap.NEAREST -> {
+                    // Whichever keyframe is closer in time, so a seek lands within half a keyframe interval.
+                    val later = rec.keyframeNear(
+                        at,
+                        preferLater = true,
+                        limit = limit,
+                    )
+                    if (later > at &&
+                        rec.wallAt(later) - target < target - rec.wallAt(earlier)
+                    ) {
+                        later
+                    } else {
+                        earlier
+                    }
+                }
+            }
             startOffset = offset
             startWall = rec.wallAt(offset)
         }
@@ -117,6 +144,9 @@ class Timeshift(private val root: File, private val bufferMs: Long = BUFFER_MS) 
         const val CUSHION_MS = 3_000L
     }
 }
+
+/** Which keyframe a seek starts at. */
+enum class Snap { EARLIER, NEAREST, LATER }
 
 /** Thrown when a live stream can't be recorded, so the player falls back to playing it directly. */
 class TimeshiftUnsupportedException(message: String) : java.io.IOException(message)

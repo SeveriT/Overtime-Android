@@ -3,6 +3,7 @@ package dev.anilbeesetti.nextplayer.feature.player.timeshift
 import android.os.Handler
 import android.os.Looper
 import androidx.media3.common.ForwardingPlayer
+import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
@@ -14,12 +15,18 @@ import java.lang.reflect.Proxy
 import kotlin.math.max
 
 /**
- * Makes a recorded live channel look like an ordinary seekable video whose length is the rewind
- * buffer, so the existing seek bar, double-tap and swipe seeking, and the notification all rewind
- * live TV. The end of the bar is live. Everything else passes straight through to [player].
+ * Makes a recorded live channel look like an ordinary seekable video spanning the rewind buffer, so
+ * the existing seek bar, double-tap and swipe seeking, and the notification all rewind live TV. The
+ * end of the bar is live. Everything else passes straight through to [player].
  *
- * A seek picks the keyframe nearest the target in the recording and restarts reading there (see
- * [TimeshiftDataSource]); the player's own position then counts from that moment.
+ * The bar starts at the oldest moment kept ([Bar.origin]) and only moves on when the buffer drops a
+ * whole chunk (~10 s), which listeners are told about, like a live HLS window. In between, the
+ * position advances with playback: the player screen estimates the position between updates by
+ * assuming exactly that, so anything else makes the knob jump back and forth.
+ *
+ * A seek restarts reading at the keyframe nearest the target (see [TimeshiftDataSource]). Seeks that
+ * come in quick succession (dragging, repeated double taps) are gathered and only the last one is
+ * carried out; until then the target is reported as the position, so taps add up.
  */
 @UnstableApi
 class TimeshiftPlayer(private val player: Player, private val timeshift: Timeshift) :
@@ -27,12 +34,29 @@ class TimeshiftPlayer(private val player: Player, private val timeshift: Timeshi
 
     private val main = Handler(Looper.getMainLooper())
     private val listeners = LinkedHashMap<Player.Listener, Player.Listener>()
-
-    // What the bar shows, kept smooth across the recorder's steps (as on Windows). Reset per channel.
-    private var shownFor: Timeshift.Session? = null
-    private var shownLive = 0L
-    private var shownSpan = 0L
     private var wasActive = false
+
+    /** The bar's start and live edge for the session it was made for. */
+    private class Bar(val session: Timeshift.Session) {
+        var origin = 0L
+        var live = 0L
+        var notifiedOrigin = 0L
+    }
+
+    private var bar: Bar? = null
+
+    /** Wall time of a seek still to be carried out (and reported as the position meanwhile). */
+    private var pendingWall: Long? = null
+    private val applySeek = Runnable {
+        val wall = pendingWall ?: return@Runnable
+        pendingWall = null
+        active()?.let {
+            seekWall(
+                it,
+                wall,
+            )
+        }
+    }
 
     init {
         timeshift.onFellBehind = {
@@ -55,11 +79,10 @@ class TimeshiftPlayer(private val player: Player, private val timeshift: Timeshi
                     }
                 }
 
-                override fun onMediaItemTransition(
-                    mediaItem: androidx.media3.common.MediaItem?,
-                    reason: Int,
-                ) {
+                override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                     // Another channel or a video: stop recording the old one.
+                    pendingWall = null
+                    main.removeCallbacks(applySeek)
                     val session = timeshift.session ?: return
                     if (mediaItem?.localConfiguration?.uri?.toString() !=
                         session.uri
@@ -96,44 +119,41 @@ class TimeshiftPlayer(private val player: Player, private val timeshift: Timeshi
         player.play()
     }
 
-    // ---- the bar: span = buffer, position = playhead -----------------------------------
+    // ---- the bar: origin = oldest moment kept, end = live --------------------------------
 
     private class Window(val start: Long, val live: Long, val position: Long)
 
+    private fun barFor(session: Timeshift.Session): Bar =
+        bar?.takeIf { it.session === session } ?: Bar(session).also { bar = it }
+
     private fun window(session: Timeshift.Session): Window {
         val rec = session.recorder
-        if (shownFor !== session) {
-            shownFor = session
-            shownLive = 0L
-            shownSpan = 0L
-        }
-        val start = rec.earliestWall
+        val b = barFor(session)
+        // Steps forward only when the recorder drops its oldest chunk.
+        b.origin = max(
+            b.origin,
+            rec.earliestWall,
+        )
         val dataEdge = max(
-            start,
+            b.origin,
             rec.liveWall,
         )
         // HLS data lands a segment at a time: let live follow the clock, never past one segment.
-        val live = max(
-            shownLive,
+        b.live = max(
+            b.live,
             System.currentTimeMillis().coerceIn(
                 dataEdge,
                 dataEdge + rec.edgeStepMs,
             ),
         )
-        shownLive = live
-        // A full buffer drops its oldest chunk at a time; a span that only grows keeps the knob steady.
-        shownSpan = max(
-            shownSpan,
-            live - start,
-        )
-        val position = (session.startWall + player.currentPosition).coerceIn(
-            live - shownSpan,
-            live,
-        )
+        val playhead = pendingWall ?: (session.startWall + player.currentPosition)
         return Window(
-            live - shownSpan,
-            live,
-            position,
+            b.origin,
+            b.live,
+            playhead.coerceIn(
+                b.origin,
+                b.live,
+            ),
         )
     }
 
@@ -232,10 +252,11 @@ class TimeshiftPlayer(private val player: Player, private val timeshift: Timeshi
 
     // ---- seeking ------------------------------------------------------------------------
 
-    private fun seekWall(session: Timeshift.Session, wall: Long, preferLater: Boolean) {
+    /** Restarts reading at the keyframe nearest [wall] (or the next one, with [preferLater]). */
+    private fun seekWall(session: Timeshift.Session, wall: Long, preferLater: Boolean = false) {
         session.startAt(
             wall,
-            preferLater,
+            if (preferLater) Snap.LATER else Snap.NEAREST,
         )
         // Unseekable live progressive media restarts reading when sent to 0: see TimeshiftDataSource.
         player.seekTo(
@@ -244,13 +265,21 @@ class TimeshiftPlayer(private val player: Player, private val timeshift: Timeshi
         )
     }
 
+    /** Takes a seek to [positionMs] on the bar; carried out once seeks stop coming in. */
     private fun seekBar(positionMs: Long): Boolean {
         val session = active() ?: return false
         val w = window(session)
-        seekWall(
-            session,
-            w.start + positionMs,
-            preferLater = w.start + positionMs > w.position,
+        pendingWall = (w.start + positionMs).coerceIn(
+            w.start,
+            max(
+                w.start,
+                session.newestWall,
+            ),
+        )
+        main.removeCallbacks(applySeek)
+        main.postDelayed(
+            applySeek,
+            SEEK_SETTLE_MS,
         )
         return true
     }
@@ -278,13 +307,14 @@ class TimeshiftPlayer(private val player: Player, private val timeshift: Timeshi
         if (!seekBar(currentPosition + seekForwardIncrement)) super.seekForward()
     }
 
-    /** Back to live. */
+    /** Back to live, at once. */
     override fun seekToDefaultPosition() {
         val session = active() ?: return super.seekToDefaultPosition()
+        pendingWall = null
+        main.removeCallbacks(applySeek)
         seekWall(
             session,
             Long.MAX_VALUE,
-            preferLater = false,
         )
     }
 
@@ -342,11 +372,24 @@ class TimeshiftPlayer(private val player: Player, private val timeshift: Timeshi
         }
     }
 
-    /** Tells listeners (the media session) when rewinding becomes possible or stops being so. */
+    /**
+     * Tells listeners (the media session) when rewinding becomes possible or stops being so, and
+     * when the bar's start moves on, so the player screen takes the new position and length at once.
+     */
     private fun tick() {
-        val isActive = active() != null
-        if (isActive == wasActive) return
+        val session = active()
+        val isActive = session != null
+        var changed = isActive != wasActive
         wasActive = isActive
+        if (session != null) {
+            window(session)
+            val b = barFor(session)
+            if (b.origin != b.notifiedOrigin) {
+                b.notifiedOrigin = b.origin
+                changed = true
+            }
+        }
+        if (!changed) return
         val commands = availableCommands
         val timeline = currentTimeline
         listeners.keys.toList().forEach {
@@ -375,5 +418,8 @@ class TimeshiftPlayer(private val player: Player, private val timeshift: Timeshi
 
     private companion object {
         const val TICK_MS = 500L
+
+        /** A seek is carried out once no other has come in for this long. */
+        const val SEEK_SETTLE_MS = 300L
     }
 }
