@@ -52,6 +52,25 @@ sealed interface LiveTvStatus {
 
 @KoinViewModel
 class LiveTvViewModel(private val repository: IptvRepository) : ViewModel() {
+    /** The channel watched last and its group, for the resume button; null until one was watched. */
+    val lastChannel: StateFlow<Pair<Channel, List<Channel>>?> = combine(
+        repository.channels,
+        repository.lastChannelUrl,
+    ) { channels, url ->
+        repository.lastChannel(
+            channels,
+            url,
+        )
+    }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5_000),
+            repository.lastChannel(
+                repository.channels.value,
+                repository.lastChannelUrl.value,
+            ),
+        )
+
     private val selection = MutableStateFlow(Selection())
     private val status = MutableStateFlow<LiveTvStatus?>(null)
     private val clock = MutableStateFlow(System.currentTimeMillis())

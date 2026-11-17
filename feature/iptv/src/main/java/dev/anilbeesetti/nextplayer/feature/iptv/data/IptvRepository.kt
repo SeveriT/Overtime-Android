@@ -353,6 +353,44 @@ class IptvRepository(context: Context) {
         }
     }
 
+    // ---- last channel ---------------------------------------------------------------
+
+    private val _lastChannelUrl = MutableStateFlow(
+        runCatching {
+            File(
+                dir,
+                LAST_CHANNEL,
+            ).readText().trim()
+        }.getOrNull()?.takeIf { it.isNotEmpty() },
+    )
+
+    /** Stream address of the live channel watched last (also after zapping in the player). */
+    val lastChannelUrl: StateFlow<String?> = _lastChannelUrl.asStateFlow()
+
+    fun rememberLastChannel(url: String) {
+        if (_lastChannelUrl.value == url) return
+        _lastChannelUrl.value = url
+        runCatching {
+            File(
+                dir,
+                LAST_CHANNEL,
+            ).writeText(url)
+        }
+    }
+
+    /** The last channel and its group (the queue it's played with), or null if it's gone. */
+    fun lastChannel(
+        channels: Map<String, List<Channel>>,
+        url: String?,
+    ): Pair<Channel, List<Channel>>? {
+        url ?: return null
+        channels.values.forEach { list ->
+            val channel = list.firstOrNull { it.url == url } ?: return@forEach
+            return channel to list.filter { it.group == channel.group }
+        }
+        return null
+    }
+
     fun newSourceId(): String = UUID.randomUUID().toString().take(8)
 
     private var launchRefreshDone = false
@@ -698,6 +736,7 @@ class IptvRepository(context: Context) {
         private const val FAVORITE_GROUPS = "favorite_groups.json"
         private const val WATCHING = "watching.json"
         private const val DISMISSED = "watching_dismissed.json"
+        private const val LAST_CHANNEL = "last_channel.txt"
 
         // Keys of Overtime's part of the settings backup.
         private const val BACKUP_VERSION_KEY = "version"

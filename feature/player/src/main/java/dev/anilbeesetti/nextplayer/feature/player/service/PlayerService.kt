@@ -55,6 +55,7 @@ import dev.anilbeesetti.nextplayer.core.model.LoopMode
 import dev.anilbeesetti.nextplayer.core.model.PlayerPreferences
 import dev.anilbeesetti.nextplayer.core.model.Resume
 import dev.anilbeesetti.nextplayer.core.ui.R as coreUiR
+import dev.anilbeesetti.nextplayer.feature.iptv.data.IptvRepository
 import dev.anilbeesetti.nextplayer.feature.player.PlayerActivity
 import dev.anilbeesetti.nextplayer.feature.player.R
 import dev.anilbeesetti.nextplayer.feature.player.extensions.addAdditionalSubtitleConfiguration
@@ -119,6 +120,9 @@ class PlayerService : MediaSessionService() {
     private val dataSourceFactory: NextDataSourceFactory by inject()
 
     private val mediaRepository: MediaRepository by inject()
+
+    /** Overtime: remembers the live channel watched last (Live TV's resume button). */
+    private val iptvRepository: IptvRepository by inject()
 
     private val imageLoader: ImageLoader by inject()
 
@@ -991,6 +995,7 @@ class PlayerService : MediaSessionService() {
                 TimeshiftPlayer(
                     player,
                     timeshift,
+                    onLiveChannel = iptvRepository::rememberLastChannel,
                 ),
             ).apply {
                 // Some Android 15 ROMs recycle shared artwork when resizing it above 500px.

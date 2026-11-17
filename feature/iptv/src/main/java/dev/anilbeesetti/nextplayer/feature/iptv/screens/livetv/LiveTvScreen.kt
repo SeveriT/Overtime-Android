@@ -94,11 +94,20 @@ private fun LiveTvContent(
     viewModel: LiveTvViewModel,
     actions: LiveTvActions,
 ) {
-    BindTopLevelFab(
-        key = TopLevelFabKey.LIVE_TV,
-        icon = NextIcons.Add,
-        onClick = actions.addSource,
-    )
+    // Resume the channel watched last (sources are added from the Sources list or the empty screen).
+    val last by viewModel.lastChannel.collectAsStateWithLifecycle()
+    last?.let { (channel, group) ->
+        BindTopLevelFab(
+            key = TopLevelFabKey.LIVE_TV,
+            icon = NextIcons.Play,
+            onClick = {
+                actions.play(
+                    channel,
+                    group,
+                )
+            },
+        )
+    }
     val bottomPadding = LocalNavigationBottomPadding.current
 
     Scaffold(

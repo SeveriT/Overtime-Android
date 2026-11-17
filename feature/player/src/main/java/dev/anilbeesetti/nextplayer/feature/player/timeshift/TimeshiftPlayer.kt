@@ -10,6 +10,7 @@ import androidx.media3.common.Player
 import androidx.media3.common.Timeline
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.source.ForwardingTimeline
+import dev.anilbeesetti.nextplayer.feature.player.utils.isApiLive
 import dev.anilbeesetti.nextplayer.feature.player.utils.isOvertimeIptv
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.InvocationTargetException
@@ -31,8 +32,12 @@ import kotlin.math.max
  * carried out; until then the target is reported as the position, so taps add up.
  */
 @UnstableApi
-class TimeshiftPlayer(private val player: Player, private val timeshift: Timeshift) :
-    ForwardingPlayer(player) {
+class TimeshiftPlayer(
+    private val player: Player,
+    private val timeshift: Timeshift,
+    /** Called with the stream address whenever a live channel starts (the last channel watched). */
+    private val onLiveChannel: (String) -> Unit = {},
+) : ForwardingPlayer(player) {
 
     private val main = Handler(Looper.getMainLooper())
     private val listeners = LinkedHashMap<Player.Listener, Player.Listener>()
@@ -87,6 +92,11 @@ class TimeshiftPlayer(private val player: Player, private val timeshift: Timeshi
                     main.removeCallbacks(applySeek)
                     // Live TV and Movies & series hide repeat and shuffle, so they must not stay on
                     // from the user's own videos (an episode would loop instead of moving on).
+                    if (mediaItem?.isApiLive ==
+                        true
+                    ) {
+                        mediaItem.localConfiguration?.uri?.toString()?.let(onLiveChannel)
+                    }
                     if (mediaItem?.isOvertimeIptv == true) {
                         if (player.repeatMode !=
                             REPEAT_MODE_OFF
