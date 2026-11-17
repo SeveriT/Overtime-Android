@@ -33,4 +33,37 @@ class EpgMatchingTest {
             guide.resolveId(channel),
         )
     }
+
+    @Test
+    fun tvgIdMatchesRegardlessOfSpaces() {
+        fun guideWith(id: String) = EpgData(
+            programmes = mapOf(
+                id to listOf(
+                    Programme(
+                        channelId = id,
+                        start = 0,
+                        stop = 60_000,
+                        title = "Sport",
+                    ),
+                ),
+            ),
+        )
+        fun channel(epgId: String) = Channel(
+            id = "s:2",
+            sourceId = "s",
+            name = "Channel",
+            group = "Sport",
+            url = "http://x/2.ts",
+            epgId = epgId,
+        )
+        // Playlist with spaces, guide without, and the other way round.
+        assertEquals(
+            "Eurosport1.fi",
+            guideWith("Eurosport1.fi").resolveId(channel("Eurosport 1.fi")),
+        )
+        assertEquals(
+            "BBC Three HD.uk",
+            guideWith("BBC Three HD.uk").resolveId(channel("BBCThreeHD.uk")),
+        )
+    }
 }

@@ -47,17 +47,27 @@ data class EpgData(
 ) {
     val isEmpty: Boolean get() = programmes.isEmpty()
 
-    /** Guide channel ids by their lower-case form, for ids that differ from the playlist's only in case. */
-    private val idsByLowercase: Map<String, String> by lazy {
-        programmes.keys.associateBy { it.lowercase() }
+    /**
+     * Guide channel ids by [idKey], for ids that differ from the playlist's only in case or spacing
+     * ("jim.fi" vs "Jim.fi", "Eurosport 1.fi" vs "Eurosport1.fi"). The first id wins a clash.
+     */
+    private val idsByKey: Map<String, String> by lazy {
+        HashMap<String, String>().also { map ->
+            programmes.keys.forEach {
+                map.putIfAbsent(
+                    idKey(it),
+                    it,
+                )
+            }
+        }
     }
 
     /** The guide's id for [channel]: its tvg-id first, then its name (also without an HD/FHD/UHD suffix). */
     fun resolveId(channel: Channel): String? {
         channel.epgId?.let { id ->
             if (programmes.containsKey(id)) return id
-            // Playlists and guides don't always agree on case ("jim.fi" vs "Jim.fi").
-            idsByLowercase[id.lowercase()]?.let { return it }
+            // Playlists and guides don't always agree on case or spaces.
+            idsByKey[idKey(id)]?.let { return it }
         }
         val name = channel.name.lowercase()
         nameToId[name]?.let { return it }
@@ -96,3 +106,6 @@ data class EpgData(
         return current to next
     }
 }
+
+/** A channel id compared loosely: lower case, without spaces. */
+private fun idKey(id: String): String = id.lowercase().filterNot { it.isWhitespace() }
