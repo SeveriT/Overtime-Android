@@ -47,7 +47,6 @@
     <string name="remember_brightness_level">ஒளி அளவை நினைவில் கொள்ளுங்கள்</string>
     <string name="resume_description">நீங்கள் நிறுத்திய இடத்திலிருந்து மீண்டும் விளையாடிய வீடியோக்களை மீண்டும் தொடங்கலாமா என்பதைத் தேர்ந்தெடுக்கவும்</string>
     <string name="seek_gesture">சைகையைத் தேடுங்கள்</string>
-    <string name="title_activity_player">அடுத்த பிளேயர் செயல்பாடு</string>
     <string name="smallest">சிறியது</string>
     <string name="largest">பெரிய</string>
     <string name="video_zoom">வீடியோ சூம்</string>
@@ -131,8 +130,6 @@
     <string name="navigate_up">மேலே செல்லவும்</string>
     <string name="no_videos_found">வீடியோக்கள் எதுவும் கிடைக்கவில்லை</string>
     <string name="open_settings">திறந்த அமைப்புகள்</string>
-    <string name="permission_info">அடுத்த பிளேயர் பயன்பாட்டிற்கு மீடியாவை அணுகவும் விளையாடவும் \"%1$s\" இசைவு தேவை. இது இல்லாமல், ஊடக அணுகல் மற்றும் பின்னணி வேலை செய்யாது. பயன்பாட்டை முழுமையாகப் பயன்படுத்த, இசைவு வழங்கவும்.</string>
-    <string name="permission_settings">அடுத்த பிளேயர் பயன்பாட்டிற்கு மீடியாவை அணுகவும் விளையாடவும் \"%1$s\" இசைவு தேவை. இது இல்லாமல், ஊடக அணுகல் மற்றும் பின்னணி வேலை செய்யாது. பயன்பாட்டை முழுமையாகப் பயன்படுத்த, அமைப்புகளின் இசைவு நிரந்தரமாக மறுக்கப்பட்டதால் அதை வழங்கவும்.</string>
     <string name="player_description">பிளேயர் தோற்றம், பின்னணி கட்டுப்பாடுகள்</string>
     <string name="player_name">வீரர்</string>
     <string name="quick_settings">விரைவான அமைப்புகள்</string>

@@ -22,10 +22,8 @@
     <string name="navigate_up">ಮೇಲೆ ಸರಿಸಿ</string>
     <string name="no_videos_found">ವಿಡಿಯೊಗಳೂ ಸಿಗಲಿಲ್ಲ</string>
     <string name="open_settings">ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆ</string>
-    <string name="permission_info">"ಮಾಧ್ಯಮವನ್ನು ಪ್ರವೇಶಿಸಲು ಮತ್ತು ಆಡಲು ನೆಕ್ಸ್ಟ್ ಪ್ಲೇಯರ್ ಅಪ್ಲಿಕೇಶನ್‌ಗೆ \"%1$s\" ಅನುಮತಿಯ ಅಗತ್ಯವಿದೆ. ಇದಿಲ್ಲದೆ, ಮಾಧ್ಯಮ ಪ್ರವೇಶ ಮತ್ತು  ತೆರೆಯ ಹಿಂದೆ ಆಡವುದು ಕೆಲಸಮಾಡುವುದಿಲ್ಲ. ಅಪ್ಲಿಕೇಶನ್ ಪೂರ್ಣವಾಗಿ ಬಳಸಲು ಅನುಮತಿ ನೀಡಿ."</string>
     <string name="permission_not_granted">ಅನುಮತಿ ನೀಡಲಾಗಿಲ್ಲ</string>
     <string name="permission_request">ಅನುಮತಿ ವಿನಂತಿ</string>
-    <string name="permission_settings">ಮಾಧ್ಯಮವನ್ನು ಪ್ರವೇಶಿಸಲು ಮತ್ತು ಆಡಲು ನೆಕ್ಸ್ಟ್ ಪ್ಲೇಯರ್ ಅಪ್ಲಿಕೇಶನ್‌ಗೆ \"%1$s\" ಅನುಮತಿಯ ಅಗತ್ಯವಿದೆ. ಇದಿಲ್ಲದೆ, ಮಾಧ್ಯಮ ಪ್ರವೇಶ ಮತ್ತು ತೆರೆಯ ಹಿಂದೆ ಆಡವುದು ಕೆಲಸಮಾಡುವುದಿಲ್ಲ. ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು ಸಂಪೂರ್ಣವಾಗಿ ಬಳಸಲು, ಅದನ್ನು ಶಾಶ್ವತವಾಗಿ ನಿರಾಕರಿಸಲಾಗಿರುವುದರಿಂದ ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಂದ ಅನುಮತಿ ನೀಡಿ.</string>
     <string name="player_controls_exit">ಮೇಲೆ ಸರಿಸಿ</string>
     <string name="player_controls_next">ಸಾಧನದ ಮುಂದೆ</string>
     <string name="player_controls_play_pause">ಆಡುವುದನ್ನ ವಿರಾಮಿಸಿ</string>
@@ -51,7 +49,6 @@
     <string name="size">ಗಾತ್ರ</string>
     <string name="sort">ವಿಂಗಡಿಸಿ</string>
     <string name="title">ಶೀರ್ಷಿಕೆ</string>
-    <string name="title_activity_player">ನೆಕ್ಸ್ಟ್ ಪ್ಲೇಯರ್ ಚಟುವಟಿಕೆ</string>
     <string name="unknown_error">ಅಜ್ಞಾತ ದೋಷವೊಂದು ಸಂಭವಿಸಿದೆ</string>
     <string name="playback">ತೆರೆಹಿಂದೆ</string>
     <string name="interface_name">ಮೇಲ್ಮೈ</string>

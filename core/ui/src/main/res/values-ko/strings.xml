@@ -14,7 +14,6 @@
     <string name="menu">메뉴</string>
     <string name="no_videos_found">동영상 없음</string>
     <string name="open_settings">설정 열기</string>
-    <string name="permission_info">앱이 미디어에 접근하고 재생하기 위해 \"%1$s\" 권한이 필요합니다. 권한이 없으면 미디어를 재생할 수 없습니다. 앱을 사용하려면 권한을 허용해 주세요.</string>
     <string name="player_name">플레이어</string>
     <string name="quick_settings">빠른 설정</string>
     <string name="remember_brightness_level">밝기 수준 기억</string>
@@ -38,7 +37,7 @@
     <string name="seek_gesture_description">좌우로 화면을 쓸어 앞뒤로 동영상 탐색</string>
     <string name="resume_description">지난 번에 멈췄던 곳에서부터 동영상 재생</string>
     <string name="size">크기</string>
-    <string name="title_activity_player">Next Player 액티비티</string>
+    <string name="title_activity_player">Overtime 액티비티</string>
     <string name="playback">재생</string>
     <string name="a_z">A-Z</string>
     <string name="z_a">Z-A</string>
@@ -83,7 +82,6 @@
     <string name="double_tap_description">두 번 눌렀을 때 동작 선택</string>
     <string name="settings">설정</string>
     <string name="interface_name">인터페이스</string>
-    <string name="permission_settings">앱이 미디어에 접근하고 재생하기 위해 \"%1$s\" 권한이 필요합니다. 권한이 없으면 미디어를 재생할 수 없습니다. 앱을 사용하려면 시스템 설정에서 권한을 허용해 주세요.</string>
     <string name="sort">정렬</string>
     <string name="player_screen_orientation">플레이어 화면 회전</string>
     <string name="title">제목</string>

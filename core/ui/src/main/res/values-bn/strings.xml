@@ -31,8 +31,6 @@
     <string name="autoplay_settings">অটো প্লে</string>
     <string name="resume">পুনরায় শুরু</string>
     <string name="resume_description">আপনি যেখানে ভিডিও দেখে শেষ করেছিলেন পরবর্তীতে সেখান থেকে ভিডিও প্লে হবে কিনা নির্বাচন করুন</string>
-    <string name="permission_settings">নেক্সট প্লেয়ার অ্যাপের মিডিয়া অ্যাক্সেস এবং চালানোর জন্য %1$s অনুমতি প্রয়োজন। এটি ছাড়া, মিডিয়া অ্যাক্সেস এবং প্লেব্যাক কাজ করবে না। অ্যাপটি সম্পূর্ণরূপে ব্যবহার করতে, সেটিংস থেকে অনুমতি দিন কারণ এটি স্থায়ীভাবে অস্বীকার করা হয়েছিল।</string>
-    <string name="permission_info">নেক্সট প্লেয়ার অ্যাপের মিডিয়া অ্যাক্সেস এবং চালানোর জন্য \"%1$s\" অনুমতি প্রয়োজন। এটি ছাড়া, মিডিয়া অ্যাক্সেস এবং প্লেব্যাক কাজ করবে না। অ্যাপটি সম্পূর্ণরূপে ব্যবহার করার জন্য অনুমতি দিন।</string>
     <string name="autoplay_settings_description">বর্তমান ফোল্ডারের পরবর্তী ভিডিওগুলো সয়ংক্রিয়ভাবে প্লে করুন</string>
     <string name="size">আকার</string>
     <string name="smallest">ক্ষুদ্রতম</string>
@@ -174,7 +172,6 @@
     <string name="enable_pip_from_settings">পিকচার-ইন-পিকচার বন্ধ করা আছে। এই বৈশিষ্ট্যটি ব্যবহার করতে সেটিংসে এটি চালু করুন।</string>
     <string name="control_buttons_alignment">নিয়ন্ত্রণ বোতামগুলোর দিকবিন্যাস</string>
     <string name="stop_player_session">প্লেয়ার সেশন বন্ধ করুন</string>
-    <string name="title_activity_player">নেক্সট প্লেয়ার কার্যকলাপ</string>
     <string name="dynamic_theme_description">সিস্টেম ওয়ালপেপার থেকে অ্যাপ্লিকেশন থিমে রঙ প্রয়োগ করুন</string>
     <string name="force_rescan_storage">স্টোরেজ পুনঃস্ক্যান করতে বাধ্য করুন</string>
     <string name="seconds">%1$s সেকেন্ড</string>

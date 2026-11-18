@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="z_a">Z-A</string>
-    <string name="permission_info">Next Player ऐप को मीडिया तक पहुंचने और चलाने के लिए \"%1$s\" अनुमति की आवश्यकता है। इसके बिना, मीडिया एक्सेस और प्लेबैक काम नहीं करेगा। ऐप का पूरा उपयोग करने के लिए अनुमति दें।</string>
-    <string name="permission_settings">Next Player ऐप को मीडिया तक पहुंचने और चलाने के लिए \"%1$s\" अनुमति की आवश्यकता है। इसके बिना, मीडिया एक्सेस और प्लेबैक काम नहीं करेगा। ऐप को पूरी तरह से उपयोग करने के लिए, सेटिंग्स से अनुमति दें क्योंकि इसे स्थायी रूप से अस्वीकार कर दिया गया था।</string>
+    <string name="permission_info">Overtime ऐप को मीडिया तक पहुंचने और चलाने के लिए \"%1$s\" अनुमति की आवश्यकता है। इसके बिना, मीडिया एक्सेस और प्लेबैक काम नहीं करेगा। ऐप का पूरा उपयोग करने के लिए अनुमति दें।</string>
+    <string name="permission_settings">Overtime ऐप को मीडिया तक पहुंचने और चलाने के लिए \"%1$s\" अनुमति की आवश्यकता है। इसके बिना, मीडिया एक्सेस और प्लेबैक काम नहीं करेगा। ऐप को पूरी तरह से उपयोग करने के लिए, सेटिंग्स से अनुमति दें क्योंकि इसे स्थायी रूप से अस्वीकार कर दिया गया था।</string>
     <string name="play_pause_ff_rewind">प्ले/पॉज और फास्ट फॉरवर्ड/रिवाइंड</string>
     <string name="no">नही</string>
     <string name="system_default">सिस्टम डिफॉल्ट</string>
@@ -65,7 +65,6 @@
     <string name="size">आकार</string>
     <string name="sort">सॉर्ट करें</string>
     <string name="title">शीर्षक</string>
-    <string name="title_activity_player">नेक्स्ट प्लेयर एक्टिविटी</string>
     <string name="unknown_error">एक अज्ञात त्रुटि उत्पन्न हुई</string>
     <string name="playback">प्लेबैक</string>
     <string name="interface_name">इंटरफेस</string>

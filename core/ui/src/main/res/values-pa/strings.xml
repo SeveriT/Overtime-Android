@@ -31,11 +31,9 @@
     <string name="about_description">ਸੰਸਕਰਣ, ਸਹਾਇਤਾ, ਆਭਾਰ</string>
     <string name="about_name">ਐਪ ਦੇ ਬਾਰੇ</string>
     <string name="group_videos">ਵੀਡੀਓਜ਼ ਨੂੰ ਫ਼ੋਲਡਰ ਅਨੁਸਾਰ ਗਰੁੱਪ ਕਰੋ</string>
-    <string name="permission_info">ਨੈਕਸਟ ਪਲੇਅਰ ਐਪ ਨੂੰ ਮੀਡੀਆ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਅਤੇ ਚਲਾਉਣ ਲਈ \"%1$s\" ਅਨੁਮਤੀ ਦੀ ਲੋੜ ਹੈ। ਇਸ ਤੋਂ ਬਿਨਾਂ, ਮੀਡੀਆ ਪਹੁੰਚ ਅਤੇ ਪਲੇਬੈਕ ਕੰਮ ਨਹੀਂ ਕਰਨਗੇ। ਐਪ ਨੂੰ ਪੂਰੀ ਤਰ੍ਹਾਂ ਵਰਤਣ ਲਈ, ਪਰਮਿਸ਼ਨ ਦਿਓ।</string>
     <string name="permission_request">ਪਰਮਿਸ਼ਨ ਲਈ ਬੇਨਤੀ</string>
     <string name="error_playing_video">ਤਰੁੱਟੀ: ਵੀਡੀਓ ਚਲਾਇਆ ਨਹੀਂ ਜਾ ਸਕਦਾ</string>
     <string name="permission_not_granted">ਪਰਮਿਸ਼ਨ ਨਹੀਂ ਦਿੱਤੀ ਗਈ</string>
-    <string name="permission_settings">ਨੈਕਸਟ ਪਲੇਅਰ ਐਪ ਨੂੰ ਮੀਡੀਆ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਅਤੇ ਚਲਾਉਣ ਲਈ \"%1$s\" ਪਰਮਿਸ਼ਨ ਦੀ ਲੋੜ ਹੈ। ਇਸ ਤੋਂ ਬਿਨਾਂ, ਮੀਡੀਆ ਪਹੁੰਚ ਅਤੇ ਪਲੇਬੈਕ ਕੰਮ ਨਹੀਂ ਕਰਨਗੇ। ਐਪ ਨੂੰ ਪੂਰੀ ਤਰ੍ਹਾਂ ਵਰਤਣ ਲਈ, ਸੈਟਿੰਗਾਂ ਤੋਂ ਇਜਾਜ਼ਤ ਦਿਓ ਕਿਉਂਕਿ ਇਸਨੂੰ ਸਥਾਈ ਤੌਰ \'ਤੇ ਅਸਵੀਕਾਰ ਕੀਤਾ ਗਿਆ ਸੀ।</string>
     <string name="resume">ਰਿਜ਼ਿਊਮ</string>
     <string name="resume_description">ਚੁਣੋ ਕਿ ਚਲਾਏ ਵੀਡੀਓ ਨੂੰ ਜਿੱਥੋਂ ਰੁਕਿਆ ਸੀ ਉਸੇ ਥਾਂ ਤੋਂ ਮੁੜ-ਚਾਲੂ ਕਰਨਾ ਹੈ ਜਾਂ ਨਹੀਂ</string>
     <string name="remember_selections_description">ਹਰੇਕ ਫਾਈਲ ਲਈ ਚੋਣ ਯਾਦ ਰੱਖੋ ਜਿਵੇਂ ਆਡੀਓ ਟਰੈਕ, ਉਪਸਿਰਲੇਖ ਟਰੈਕ, ਆਦਿ।</string>
@@ -46,7 +44,6 @@
     <string name="settings">ਸੈਟਿੰਗਜ਼</string>
     <string name="size">ਆਕਾਰ</string>
     <string name="sort">ਲੜੀਬੱਧ</string>
-    <string name="title_activity_player">ਨੈਕਸਟ ਪਲੇਅਰ ਐਕਟੀਵਿਟੀ</string>
     <string name="unknown_error">ਇੱਕ ਅਗਿਆਤ ਤਰੁੱਟੀ ਹੋਈ ਹੈ</string>
     <string name="playback">ਪਲੇਬੈਕ</string>
     <string name="dark_theme">ਗੂੜ੍ਹਾ ਥੀਮ</string>
