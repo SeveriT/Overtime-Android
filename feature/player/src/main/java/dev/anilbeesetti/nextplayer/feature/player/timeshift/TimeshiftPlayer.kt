@@ -52,6 +52,9 @@ class TimeshiftPlayer(
 
     private var bar: Bar? = null
 
+    /** The pending seek is to the end of the bar: it goes live. */
+    private var pendingLive = false
+
     /** Wall time of a seek still to be carried out (and reported as the position meanwhile). */
     private var pendingWall: Long? = null
     private val applySeek = Runnable {
@@ -60,7 +63,7 @@ class TimeshiftPlayer(
         active()?.let {
             seekWall(
                 it,
-                wall,
+                if (pendingLive) Long.MAX_VALUE else wall,
             )
         }
     }
@@ -84,6 +87,11 @@ class TimeshiftPlayer(
                     ) {
                         playDirect()
                     }
+                }
+
+                override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+                    // Paused: the stream goes on without us, so we're behind live from now on.
+                    if (!playWhenReady) timeshift.session?.followingLive = false
                 }
 
                 override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
@@ -170,8 +178,8 @@ class TimeshiftPlayer(
         val pending = pendingWall
         val playhead = pending ?: (session.startWall + player.currentPosition)
         // Live playback sits a cushion (plus up to a keyframe interval) behind the edge so it never runs
-        // dry; within that, show the knob at the end, as the Windows app does.
-        val atLive = pending == null && b.live - playhead <= liveTolerance(session)
+        // dry; while following live the knob still shows at the end.
+        val atLive = pending == null && session.followingLive
         return Window(
             b.origin,
             b.live,
@@ -184,16 +192,6 @@ class TimeshiftPlayer(
                 )
             },
         )
-    }
-
-    /** How far behind the edge still counts as live (same sum as the Windows app's rewind bar). */
-    private fun liveTolerance(session: Timeshift.Session): Long {
-        val rec = session.recorder
-        return max(
-            session.cushionMs,
-            rec.liveDelayMs,
-        ) + LIVE_SLACK_MS + rec.edgeStepMs +
-            rec.keyframeIntervalMs.coerceAtMost(MAX_KEYFRAME_SLACK_MS)
     }
 
     override fun getDuration(): Long = active()?.let {
@@ -293,6 +291,8 @@ class TimeshiftPlayer(
 
     /** Restarts reading at the keyframe nearest [wall] (or the next one, with [preferLater]). */
     private fun seekWall(session: Timeshift.Session, wall: Long, preferLater: Boolean = false) {
+        // Going live (or to the very end) follows live; anywhere else is watching behind it.
+        session.followingLive = wall >= session.newestWall
         session.startAt(
             wall,
             if (preferLater) Snap.LATER else Snap.NEAREST,
@@ -313,7 +313,10 @@ class TimeshiftPlayer(
     private fun seekBar(positionMs: Long): Boolean {
         val session = active() ?: return false
         val w = window(session)
-        pendingWall = (w.start + positionMs).coerceIn(
+        val target = w.start + positionMs
+        // Dropped at (or within a moment of) the end: back to live.
+        pendingLive = target >= session.newestWall - END_SNAP_MS
+        pendingWall = target.coerceIn(
             w.start,
             max(
                 w.start,
@@ -464,11 +467,8 @@ class TimeshiftPlayer(
         const val TAG = "Timeshift"
         const val TICK_MS = 500L
 
-        /** Extra room for live: network jitter and the player's own buffer (as on Windows). */
-        const val LIVE_SLACK_MS = 4_000L
-
-        /** A keyframe interval counts towards live up to this much. */
-        const val MAX_KEYFRAME_SLACK_MS = 10_000L
+        /** A seek this close to the newest moment counts as going live. */
+        const val END_SNAP_MS = 1_500L
 
         /** A seek is carried out once no other has come in for this long. */
         const val SEEK_SETTLE_MS = 300L

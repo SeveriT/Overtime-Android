@@ -24,6 +24,12 @@ class Timeshift(private val root: File, private val bufferMs: Long = BUFFER_MS) 
         /** Wall time of the data at [startOffset]; 0 until playback has started from the buffer. */
         @Volatile var startWall: Long = 0L
 
+        /**
+         * Watching live: from opening the channel, going live or seeking to the end, until a pause or a
+         * seek back. The bar shows the knob at the end then, and the LIVE button is lit.
+         */
+        @Volatile var followingLive: Boolean = true
+
         /** Newest moment playback may start at, a cushion behind live so it never runs dry. */
         val newestWall: Long get() = recorder.liveWall - max(
             cushionMs,

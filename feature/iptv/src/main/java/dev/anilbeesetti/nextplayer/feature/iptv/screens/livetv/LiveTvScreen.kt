@@ -32,10 +32,12 @@ import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material.icons.rounded.StarBorder
 import androidx.compose.material.icons.rounded.ViewTimeline
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -87,7 +89,10 @@ fun LiveTvScreen(viewModel: LiveTvViewModel, actions: LiveTvActions) {
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(
+    ExperimentalMaterial3Api::class,
+    ExperimentalMaterial3ExpressiveApi::class,
+)
 @Composable
 private fun LiveTvContent(
     state: LiveTvUiState,
@@ -155,10 +160,19 @@ private fun LiveTvContent(
                             onClick = { viewModel.refreshAll() },
                             enabled = !state.busy,
                         ) {
-                            Icon(
-                                Icons.Rounded.Refresh,
-                                contentDescription = stringResource(R.string.live_tv_refresh),
-                            )
+                            // While playlists or guides update, the button turns into the M3
+                            // Expressive loading indicator (the shape-morphing ring).
+                            if (state.busy) {
+                                LoadingIndicator(
+                                    modifier = Modifier.size(32.dp),
+                                    color = MaterialTheme.colorScheme.primary,
+                                )
+                            } else {
+                                Icon(
+                                    Icons.Rounded.Refresh,
+                                    contentDescription = stringResource(R.string.live_tv_refresh),
+                                )
+                            }
                         }
                     }
                     // Always there, as on NextPlayer's other main screens.
