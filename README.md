@@ -4,6 +4,15 @@ Overtime is an IPTV player for Android phones and tablets: live TV with a TV gui
 
 It's built on [Next Player](https://github.com/anilbeesetti/nextplayer), so it also plays your own videos, network shares and streams.
 
+## Download
+
+Get the latest APK from [Releases](https://github.com/SeveriT/Overtime-Android/releases/latest):
+
+- **arm64-v8a**: for almost all phones and tablets from the last few years
+- **universal**: works on any device, but is larger
+
+Requires Android 7.0 or newer. Updates install over the previous version.
+
 ## Features
 
 ### Live TV
@@ -17,7 +26,14 @@ It's built on [Next Player](https://github.com/anilbeesetti/nextplayer), so it a
 - TV guide grid with a 12-hour timeline, a now line and programme details
 - Guides read from the playlist or set by hand (several addresses allowed), cached for 12 hours
 - Automatic refresh when the app opens, plus manual refresh
-- Next and previous channel in the player
+- Resume button that reopens the last channel watched
+
+### Live TV player
+
+- Live rewind: pause and go back up to 5 minutes, with seeking, double-tap skip and a LIVE button to return to live
+- Channel list in the player, the same as the main screen, to switch channels without leaving
+- Next and previous channel
+- Shuffle and repeat hidden for live TV, movies and episodes
 
 ### Movies & series
 
@@ -46,6 +62,7 @@ It's built on [Next Player](https://github.com/anilbeesetti/nextplayer), so it a
 - Swipe for brightness, volume and seeking; zoom gesture
 - Playback speed, picture-in-picture and background playback
 - Material 3 design with dynamic colours
+- Settings export and import, including IPTV sources and options
 
 ## Supported formats
 
