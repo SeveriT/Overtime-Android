@@ -7,6 +7,7 @@ import android.content.pm.ActivityInfo
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
+import android.os.PowerManager
 import android.util.Log
 import android.view.WindowManager
 import android.widget.Toast
@@ -54,6 +55,7 @@ import dev.anilbeesetti.nextplayer.feature.player.service.tryDecoderFallback
 import dev.anilbeesetti.nextplayer.feature.player.state.rememberMediaController
 import dev.anilbeesetti.nextplayer.feature.player.utils.PlayerApi
 import dev.anilbeesetti.nextplayer.feature.player.utils.PlaylistPlaybackContract
+import dev.anilbeesetti.nextplayer.feature.player.utils.isApiLive
 import dev.anilbeesetti.nextplayer.feature.player.utils.toMediaQueue
 import io.github.anilbeesetti.nextlib.media3ext.ffdecoder.DecoderMode
 import java.util.concurrent.CopyOnWriteArrayList
@@ -374,8 +376,11 @@ class PlayerActivity : ComponentActivity() {
             lastDecoder = sessionExtras.decoderServiceState().videoMode
             viewModel.onAction(PlayerAction.UpdatePlayWhenReady(playWhenReady))
             removeListener(playbackStateListener)
-            val shouldPlayInBackground =
-                playInBackground || (playerApi.sticky ?: playerPreferences.autoBackgroundPlay)
+            // Overtime: live TV keeps going as audio when the screen is switched off.
+            val liveWithScreenOff = currentMediaItem?.isApiLive == true &&
+                !getSystemService(PowerManager::class.java).isInteractive
+            val shouldPlayInBackground = playInBackground || liveWithScreenOff ||
+                (playerApi.sticky ?: playerPreferences.autoBackgroundPlay)
             if (subtitleFileSuspendLauncher.isAwaitingResult ||
                 audioFileSuspendLauncher.isAwaitingResult ||
                 !shouldPlayInBackground

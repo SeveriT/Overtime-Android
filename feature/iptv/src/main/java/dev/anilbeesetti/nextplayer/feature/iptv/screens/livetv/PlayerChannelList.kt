@@ -121,4 +121,27 @@ fun PlayerChannelList(
     }
 }
 
+/** The favourite channels of every source, in source and playlist order, as the player queues them. */
+@Composable
+fun rememberFavouriteChannels(): List<QueuedChannel> {
+    val repository = koinInject<IptvRepository>()
+    val known by repository.channels.collectAsState()
+    val favorites by repository.favorites.collectAsState()
+    return remember(
+        known,
+        favorites,
+    ) {
+        known.values
+            .flatten()
+            .filter { it.id in favorites }
+            .distinctBy { it.url }
+            .map {
+                QueuedChannel(
+                    url = it.url,
+                    title = it.name,
+                )
+            }
+    }
+}
+
 private const val CLOCK_TICK_MS = 30_000L

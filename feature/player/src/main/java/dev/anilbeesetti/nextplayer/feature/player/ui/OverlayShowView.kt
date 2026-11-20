@@ -82,6 +82,11 @@ fun BoxScope.OverlayShowView(
         player = player,
     )
 
+    FavouritesView(
+        show = overlayView == OverlayView.FAVOURITES,
+        player = player,
+    )
+
     ChaptersView(
         show = overlayView == OverlayView.CHAPTERS,
         chapters = chapters,
@@ -101,4 +106,5 @@ enum class OverlayView {
     VIDEO_CONTENT_SCALE,
     PLAYLIST,
     CHAPTERS,
+    FAVOURITES,
 }

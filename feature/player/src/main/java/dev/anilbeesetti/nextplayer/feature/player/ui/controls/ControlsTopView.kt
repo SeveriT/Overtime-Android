@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.union
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -44,8 +46,10 @@ fun ControlsTopView(
     modifier: Modifier = Modifier,
     title: String,
     videoDecoderMode: DecoderMode?,
+    isLiveTv: Boolean = false,
     onBackClick: () -> Unit = {},
     onDecoderClick: () -> Unit = {},
+    onFavouritesClick: () -> Unit = {},
     onAudioClick: () -> Unit = {},
     onSubtitleClick: () -> Unit = {},
     onPlaylistClick: () -> Unit = {},
@@ -55,6 +59,7 @@ fun ControlsTopView(
         WindowInsets.displayCutout,
     ).asPaddingValues()
     val decoderDescription = stringResource(R.string.select_decoders)
+    val favouritesDescription = stringResource(R.string.live_tv_favourites)
     // Add top spacing only when the system bars don't already provide it (e.g. on TV / landscape).
     val extraTopPadding = if (systemBarsPadding.calculateTopPadding() == 0.dp) 16.dp else 0.dp
     Row(
@@ -87,17 +92,32 @@ fun ControlsTopView(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            PlayerButton(
-                modifier = Modifier
-                    .semantics { contentDescription = decoderDescription }
-                    .focusRequester(focusRequester = firstControlFocusRequester),
-                onClick = onDecoderClick,
-            ) {
-                Text(
-                    text = stringResource((videoDecoderMode ?: DecoderMode.HARDWARE).labelRes),
-                    style = MaterialTheme.typography.labelLarge,
-                    maxLines = 1,
-                )
+            // Overtime: on live TV the decoder button makes way for the favourite channels.
+            if (isLiveTv) {
+                PlayerButton(
+                    modifier = Modifier
+                        .semantics { contentDescription = favouritesDescription }
+                        .focusRequester(focusRequester = firstControlFocusRequester),
+                    onClick = onFavouritesClick,
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Star,
+                        contentDescription = null,
+                    )
+                }
+            } else {
+                PlayerButton(
+                    modifier = Modifier
+                        .semantics { contentDescription = decoderDescription }
+                        .focusRequester(focusRequester = firstControlFocusRequester),
+                    onClick = onDecoderClick,
+                ) {
+                    Text(
+                        text = stringResource((videoDecoderMode ?: DecoderMode.HARDWARE).labelRes),
+                        style = MaterialTheme.typography.labelLarge,
+                        maxLines = 1,
+                    )
+                }
             }
             PlayerButton(onClick = onPlaylistClick) {
                 Icon(
