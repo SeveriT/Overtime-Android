@@ -8,6 +8,7 @@ import dev.anilbeesetti.nextplayer.feature.iptv.screens.addsource.AddSourceScree
 import dev.anilbeesetti.nextplayer.feature.iptv.screens.addsource.AddSourceViewModel
 import dev.anilbeesetti.nextplayer.feature.iptv.screens.continuewatching.ContinueWatchingScreen
 import dev.anilbeesetti.nextplayer.feature.iptv.screens.continuewatching.ContinueWatchingViewModel
+import dev.anilbeesetti.nextplayer.feature.iptv.screens.hidden.HiddenChannelsScreen
 import dev.anilbeesetti.nextplayer.feature.iptv.screens.library.LibraryScreen
 import dev.anilbeesetti.nextplayer.feature.iptv.screens.library.LibraryViewModel
 import dev.anilbeesetti.nextplayer.feature.iptv.screens.library.PlayableItem
@@ -68,6 +69,20 @@ fun EntryProviderScope<NavKey>.sourcesEntry(
             onAdd = onAdd,
             onEdit = onEdit,
         )
+    }
+}
+
+@Serializable
+object HiddenChannelsRoute : NavKey
+
+fun NavBackStack<NavKey>.navigateToHiddenChannels() {
+    add(element = HiddenChannelsRoute)
+}
+
+/** Settings > Hidden channels. */
+fun EntryProviderScope<NavKey>.hiddenChannelsEntry(onNavigateUp: () -> Unit) {
+    entry<HiddenChannelsRoute> {
+        HiddenChannelsScreen(onNavigateUp = onNavigateUp)
     }
 }
 

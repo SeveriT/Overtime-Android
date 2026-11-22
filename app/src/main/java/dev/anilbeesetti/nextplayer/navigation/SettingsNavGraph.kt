@@ -3,6 +3,8 @@ package dev.anilbeesetti.nextplayer.navigation
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
+import dev.anilbeesetti.nextplayer.feature.iptv.navigation.hiddenChannelsEntry
+import dev.anilbeesetti.nextplayer.feature.iptv.navigation.navigateToHiddenChannels
 import dev.anilbeesetti.nextplayer.settings.Setting
 import dev.anilbeesetti.nextplayer.settings.navigation.aboutPreferencesEntry
 import dev.anilbeesetti.nextplayer.settings.navigation.appearancePreferencesEntry
@@ -40,6 +42,7 @@ fun EntryProviderScope<NavKey>.settingsNavGraph(backStack: NavBackStack<NavKey>)
                 Setting.AUDIO -> backStack.navigateToAudioPreferences()
                 Setting.SUBTITLE -> backStack.navigateToSubtitlePreferences()
                 Setting.GENERAL -> backStack.navigateToGeneralPreferences()
+                Setting.HIDDEN_CHANNELS -> backStack.navigateToHiddenChannels()
                 Setting.ABOUT -> backStack.navigateToAboutPreferences()
             }
         },
@@ -78,6 +81,9 @@ fun EntryProviderScope<NavKey>.settingsNavGraph(backStack: NavBackStack<NavKey>)
         onNavigateUp = { backStack.removeLastIfNotRoot() },
     )
     librariesEntry(
+        onNavigateUp = { backStack.removeLastIfNotRoot() },
+    )
+    hiddenChannelsEntry(
         onNavigateUp = { backStack.removeLastIfNotRoot() },
     )
 }

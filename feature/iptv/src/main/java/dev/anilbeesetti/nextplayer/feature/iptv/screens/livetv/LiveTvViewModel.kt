@@ -88,7 +88,14 @@ class LiveTvViewModel(private val repository: IptvRepository) : ViewModel() {
         combine(
             repository.favorites,
             repository.favoriteGroups,
-        ) { f, g -> f to g },
+            repository.hidden,
+        ) { f, g, h ->
+            Triple(
+                f,
+                g,
+                h,
+            )
+        },
         repository.epg,
         combine(
             selection,
@@ -101,10 +108,11 @@ class LiveTvViewModel(private val repository: IptvRepository) : ViewModel() {
                 c,
             )
         },
-    ) { sources, channelsBySource, (favorites, favoriteGroups), epg, (sel, st, now) ->
+    ) { sources, channelsBySource, (favorites, favoriteGroups, hidden), epg, (sel, st, now) ->
         val sourceId =
             sel.sourceId?.takeIf { id -> sources.any { it.id == id } } ?: sources.firstOrNull()?.id
-        val all = sourceId?.let(channelsBySource::get).orEmpty()
+        // Hidden channels are left out of every group, Favourites, search and the guide.
+        val all = sourceId?.let(channelsBySource::get).orEmpty().filterNot { it.id in hidden }
         val counts = LinkedHashMap<String, Int>()
         all.forEach { counts[it.group] = (counts[it.group] ?: 0) + 1 }
         val own = counts.map { (name, count) ->
@@ -217,6 +225,12 @@ class LiveTvViewModel(private val repository: IptvRepository) : ViewModel() {
     }
 
     fun toggleFavorite(channel: Channel) = repository.toggleFavorite(channel.id)
+
+    /** Hides [channel] from Live TV; Settings > Hidden channels brings it back. */
+    fun hide(channel: Channel) = repository.setHidden(
+        channel.id,
+        true,
+    )
 
     /**
      * Reloads channels and guides of every source. [quiet] (the refresh at launch) says "Updating" and keeps

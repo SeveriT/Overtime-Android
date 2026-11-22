@@ -61,6 +61,12 @@
     <string name="iptv_reorder">Drag to reorder</string>
     <string name="player_live">LIVE</string>
     <string name="player_channels">Channels</string>
+    <string name="live_tv_hide_channel">Hide channel</string>
+    <string name="live_tv_show_channel">Show</string>
+    <string name="hidden_channels">Hidden channels</string>
+    <string name="hidden_channels_description">Channels you hid from Live TV</string>
+    <string name="hidden_channels_info">Hidden channels are left out of Live TV, Favourites, search, the guide and the player\'s channel lists.</string>
+    <string name="hidden_channels_empty">No hidden channels. Long-press a channel in Live TV and choose Hide channel to hide it.</string>
     <string name="player_no_favourites">No favourite channels yet</string>
     <string name="player_no_favourites_hint">Tap the star on a channel to add it here.</string>
     <string name="player_go_live">Back to live</string>

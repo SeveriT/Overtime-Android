@@ -127,13 +127,15 @@ fun rememberFavouriteChannels(): List<QueuedChannel> {
     val repository = koinInject<IptvRepository>()
     val known by repository.channels.collectAsState()
     val favorites by repository.favorites.collectAsState()
+    val hidden by repository.hidden.collectAsState()
     return remember(
         known,
         favorites,
+        hidden,
     ) {
         known.values
             .flatten()
-            .filter { it.id in favorites }
+            .filter { it.id in favorites && it.id !in hidden }
             .distinctBy { it.url }
             .map {
                 QueuedChannel(

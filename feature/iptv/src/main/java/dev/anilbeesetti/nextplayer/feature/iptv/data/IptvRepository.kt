@@ -94,6 +94,23 @@ class IptvRepository(context: Context) {
     private val _favorites = MutableStateFlow(readSet(FAVORITES))
     val favorites: StateFlow<Set<String>> = _favorites.asStateFlow()
 
+    /** Channels the user hid (by id): left out of Live TV, the guide and the player's lists. */
+    private val _hidden = MutableStateFlow(readSet(HIDDEN))
+    val hidden: StateFlow<Set<String>> = _hidden.asStateFlow()
+
+    fun setHidden(channelId: String, hidden: Boolean) {
+        _hidden.update { if (hidden) it + channelId else it - channelId }
+        File(
+            dir,
+            HIDDEN,
+        ).writeText(
+            json.encodeToString(
+                SetSerializer(String.serializer()),
+                _hidden.value,
+            ),
+        )
+    }
+
     /** Starred channel groups as "<source id>|<group>": listed first, as on Windows. */
     private val _favoriteGroups = MutableStateFlow(readSet(FAVORITE_GROUPS))
     val favoriteGroups: StateFlow<Set<String>> = _favoriteGroups.asStateFlow()
@@ -219,6 +236,13 @@ class IptvRepository(context: Context) {
                 ),
             )
             put(
+                BACKUP_HIDDEN,
+                json.encodeToJsonElement(
+                    strings,
+                    _hidden.value,
+                ),
+            )
+            put(
                 BACKUP_WATCHING,
                 json.encodeToJsonElement(
                     ListSerializer(WatchEntry.serializer()),
@@ -313,6 +337,21 @@ class IptvRepository(context: Context) {
             )
         }
         part(
+            BACKUP_HIDDEN,
+            strings,
+        )?.let { imported ->
+            _hidden.update { it + imported }
+            File(
+                dir,
+                HIDDEN,
+            ).writeText(
+                json.encodeToString(
+                    strings,
+                    _hidden.value,
+                ),
+            )
+        }
+        part(
             BACKUP_WATCHING,
             ListSerializer(WatchEntry.serializer()),
         )?.let { imported ->
@@ -386,7 +425,11 @@ class IptvRepository(context: Context) {
         url ?: return null
         channels.values.forEach { list ->
             val channel = list.firstOrNull { it.url == url } ?: return@forEach
-            return channel to list.filter { it.group == channel.group }
+            val hidden = _hidden.value
+            return channel to
+                list.filter {
+                    it.group == channel.group && (it.id !in hidden || it.id == channel.id)
+                }
         }
         return null
     }
@@ -743,6 +786,8 @@ class IptvRepository(context: Context) {
         private const val BACKUP_SOURCES = "sources"
         private const val BACKUP_FAVORITES = "favoriteChannels"
         private const val BACKUP_FAVORITE_GROUPS = "favoriteGroups"
+        private const val HIDDEN = "hidden_channels.json"
+        private const val BACKUP_HIDDEN = "hiddenChannels"
         private const val BACKUP_WATCHING = "continueWatching"
         private const val BACKUP_DISMISSED = "continueWatchingDismissed"
 

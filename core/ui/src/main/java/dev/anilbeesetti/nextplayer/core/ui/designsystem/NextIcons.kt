@@ -94,6 +94,7 @@ import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material.icons.rounded.Update
 import androidx.compose.material.icons.rounded.VideoLibrary
+import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -136,6 +137,7 @@ object NextIcons {
     val Headset = Icons.Rounded.Headset
     val HeadsetOff = Icons.Rounded.HeadsetOff
     val Info = Icons.Rounded.Info
+    val HiddenChannels = Icons.Rounded.VisibilityOff
     val Home = Icons.Rounded.Home
     val HomeOutline = Icons.Outlined.Home
     val Network = Icons.Rounded.Lan

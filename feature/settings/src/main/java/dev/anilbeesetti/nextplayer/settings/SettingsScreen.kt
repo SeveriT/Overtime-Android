@@ -112,6 +112,7 @@ enum class Setting {
     AUDIO,
     SUBTITLE,
     GENERAL,
+    HIDDEN_CHANNELS,
     ABOUT,
 }
 
@@ -162,6 +163,12 @@ private enum class SettingRow(
         descriptionResId = R.string.general_description,
         icon = NextIcons.ExtraSettings,
         setting = Setting.GENERAL,
+    ),
+    HIDDEN_CHANNELS(
+        titleResId = R.string.hidden_channels,
+        descriptionResId = R.string.hidden_channels_description,
+        icon = NextIcons.HiddenChannels,
+        setting = Setting.HIDDEN_CHANNELS,
     ),
     ABOUT(
         titleResId = R.string.about_name,
