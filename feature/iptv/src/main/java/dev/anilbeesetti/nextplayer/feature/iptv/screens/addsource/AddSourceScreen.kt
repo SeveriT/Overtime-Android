@@ -37,6 +37,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.anilbeesetti.nextplayer.core.ui.R
 import dev.anilbeesetti.nextplayer.core.ui.components.NextTopAppBar
 import dev.anilbeesetti.nextplayer.feature.iptv.model.SourceType
+import dev.anilbeesetti.nextplayer.feature.iptv.screens.screenSheet
 
 /** Add or edit a playlist URL or an Xtream Codes login. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -59,11 +60,13 @@ fun AddSourceScreen(viewModel: AddSourceViewModel, onDone: () -> Unit) {
                 },
             )
         },
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
     ) { padding ->
         Column(
             Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .screenSheet(padding)
+                .padding(bottom = padding.calculateBottomPadding())
                 .imePadding()
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),

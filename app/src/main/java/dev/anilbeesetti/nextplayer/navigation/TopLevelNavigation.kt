@@ -151,8 +151,8 @@ enum class TopLevelDestination(
     ;
 
     companion object {
-        /** Where the app opens and where back from another tab returns: Overtime is an IPTV player first. */
-        val START = LIVE_TV
+        /** Where the app opens and where back from another tab returns: Home (the device's own videos). */
+        val START = MEDIA
     }
 }
 

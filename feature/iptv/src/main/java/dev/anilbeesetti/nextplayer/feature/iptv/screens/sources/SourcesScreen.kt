@@ -52,6 +52,7 @@ import dev.anilbeesetti.nextplayer.core.ui.designsystem.NextIcons
 import dev.anilbeesetti.nextplayer.feature.iptv.data.IptvRepository
 import dev.anilbeesetti.nextplayer.feature.iptv.model.IptvSource
 import dev.anilbeesetti.nextplayer.feature.iptv.model.SourceType
+import dev.anilbeesetti.nextplayer.feature.iptv.screens.screenSheet
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -138,9 +139,13 @@ fun SourcesScreen(
                 text = { Text(stringResource(R.string.live_tv_add_source)) },
             )
         },
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
     ) { padding ->
         LazyColumn(
-            Modifier.fillMaxSize().padding(padding),
+            Modifier
+                .fillMaxSize()
+                .screenSheet(padding)
+                .padding(bottom = padding.calculateBottomPadding()),
             state = listState,
             contentPadding = PaddingValues(
                 start = 12.dp,

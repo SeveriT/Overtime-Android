@@ -64,6 +64,7 @@ import dev.anilbeesetti.nextplayer.core.ui.components.NextTopAppBar
 import dev.anilbeesetti.nextplayer.core.ui.components.TopLevelFabKey
 import dev.anilbeesetti.nextplayer.core.ui.designsystem.NextIcons
 import dev.anilbeesetti.nextplayer.feature.iptv.model.Channel
+import dev.anilbeesetti.nextplayer.feature.iptv.screens.screenSheet
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -187,18 +188,7 @@ private fun LiveTvContent(
         },
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
     ) { padding ->
-        Box(
-            Modifier
-                .fillMaxSize()
-                .padding(top = padding.calculateTopPadding())
-                .clip(
-                    RoundedCornerShape(
-                        topStart = 24.dp,
-                        topEnd = 24.dp,
-                    ),
-                )
-                .background(MaterialTheme.colorScheme.background),
-        ) {
+        Box(Modifier.fillMaxSize().screenSheet(padding)) {
             if (state.sources.isEmpty()) {
                 EmptyState(onAdd = actions.addSource)
                 return@Box

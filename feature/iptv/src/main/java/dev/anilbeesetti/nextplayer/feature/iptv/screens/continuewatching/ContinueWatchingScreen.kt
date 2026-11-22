@@ -65,6 +65,7 @@ import dev.anilbeesetti.nextplayer.feature.iptv.model.PlaybackProgress
 import dev.anilbeesetti.nextplayer.feature.iptv.model.WatchEntry
 import dev.anilbeesetti.nextplayer.feature.iptv.model.continueWatching
 import dev.anilbeesetti.nextplayer.feature.iptv.screens.library.PlayableItem
+import dev.anilbeesetti.nextplayer.feature.iptv.screens.screenSheet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -156,18 +157,19 @@ fun ContinueWatchingScreen(
                 },
             )
         },
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
     ) { padding ->
         val list = items
         when {
             list == null -> Box(
-                Modifier.fillMaxSize().padding(padding),
+                Modifier.fillMaxSize().screenSheet(padding),
                 contentAlignment = Alignment.Center,
             ) {
                 CircularProgressIndicator()
             }
 
             list.isEmpty() -> Column(
-                Modifier.fillMaxSize().padding(padding).padding(32.dp),
+                Modifier.fillMaxSize().screenSheet(padding).padding(32.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
@@ -191,13 +193,12 @@ fun ContinueWatchingScreen(
                 contentPadding = PaddingValues(
                     start = 12.dp,
                     end = 12.dp,
-                    top =
-                        padding.calculateTopPadding() + 8.dp,
+                    top = 8.dp,
                     bottom = 16.dp + bottomPadding,
                 ),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize().screenSheet(padding),
             ) {
                 items(
                     list,

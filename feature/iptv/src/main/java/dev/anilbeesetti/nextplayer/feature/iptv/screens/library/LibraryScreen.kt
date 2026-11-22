@@ -65,6 +65,7 @@ import dev.anilbeesetti.nextplayer.core.ui.components.TopLevelFabKey
 import dev.anilbeesetti.nextplayer.core.ui.designsystem.NextIcons
 import dev.anilbeesetti.nextplayer.feature.iptv.model.LibraryItem
 import dev.anilbeesetti.nextplayer.feature.iptv.model.LibraryKind
+import dev.anilbeesetti.nextplayer.feature.iptv.screens.screenSheet
 
 /** Movies or Series: category chips, search, and a poster grid. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -98,8 +99,9 @@ fun LibraryScreen(
                 },
             )
         },
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
     ) { padding ->
-        Column(Modifier.fillMaxSize().padding(top = padding.calculateTopPadding())) {
+        Column(Modifier.fillMaxSize().screenSheet(padding)) {
             if (state.sources.isEmpty()) {
                 Text(
                     stringResource(R.string.library_no_source),
@@ -371,8 +373,15 @@ fun TitleDetailsScreen(
                 },
             )
         },
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
     ) { padding ->
-        Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState())) {
+        Column(
+            Modifier
+                .fillMaxSize()
+                .screenSheet(padding)
+                .padding(bottom = padding.calculateBottomPadding())
+                .verticalScroll(rememberScrollState()),
+        ) {
             val backdrop =
                 state.movie?.backdrop ?: state.series?.backdrop ?: item.backdrop ?: item.poster
             Box(
