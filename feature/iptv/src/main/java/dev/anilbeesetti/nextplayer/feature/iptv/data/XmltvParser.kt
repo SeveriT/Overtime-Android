@@ -88,7 +88,8 @@ object XmltvParser {
                     XmlPullParser.END_TAG -> when (parser.name) {
                         "display-name" -> {
                             val id = channelId
-                            val name = text?.toString()?.trim().orEmpty()
+                            // Repaired like the channel names, so the two still match
+                            val name = TextRepair.repair(text?.toString()?.trim().orEmpty())
                             if (id != null &&
                                 name.isNotEmpty()
                             ) {
@@ -110,8 +111,8 @@ object XmltvParser {
                                     pChannel,
                                     pStart,
                                     pStop,
-                                    title.toString().trim(),
-                                    desc.toString().trim(),
+                                    TextRepair.repair(title.toString().trim()),
+                                    TextRepair.repair(desc.toString().trim()),
                                 )
                         }
                     }

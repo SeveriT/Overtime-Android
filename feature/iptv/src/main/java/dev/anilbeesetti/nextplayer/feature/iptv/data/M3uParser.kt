@@ -96,8 +96,13 @@ object M3uParser {
                         channels += Channel(
                             id = "$sourceId:${line.hashCode().toUInt().toString(16)}",
                             sourceId = sourceId,
-                            name = entry.name.ifEmpty { line.substringAfterLast('/') },
-                            group = group,
+                            // TextRepair: names some providers send mangled ("Jyv채skyl채")
+                            name = TextRepair.repair(
+                                entry.name.ifEmpty {
+                                    line.substringAfterLast('/')
+                                },
+                            ),
+                            group = TextRepair.repair(group),
                             url = line,
                             logo = entry.attrs["tvg-logo"]?.takeIf { it.isNotBlank() },
                             epgId = entry.attrs["tvg-id"]?.takeIf { it.isNotBlank() },

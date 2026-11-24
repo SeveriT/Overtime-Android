@@ -16,8 +16,8 @@ android {
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         // Overtime: its own app id, so it installs alongside Next Player.
         applicationId = "fi.severi.overtime"
-        versionCode = 150
-        versionName = "1.5.0"
+        versionCode = 151
+        versionName = "1.5.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments["clearPackageData"] = "true"
     }

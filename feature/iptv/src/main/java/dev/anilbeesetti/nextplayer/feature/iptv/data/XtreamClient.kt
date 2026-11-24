@@ -307,8 +307,12 @@ class XtreamClient(private val http: HttpText, private val json: Json) {
         val YEAR = Regex("""\((\d{4})\)""")
     }
 
-    private fun JsonObject.str(key: String): String =
-        (get(key) as? JsonPrimitive)?.takeUnless { it is JsonNull }?.content?.trim().orEmpty()
+    // TextRepair: names, categories and plots some providers send mangled ("Jyv채skyl채")
+    private fun JsonObject.str(key: String): String = TextRepair.repair(
+        (get(key) as? JsonPrimitive)?.takeUnless {
+            it is JsonNull
+        }?.content?.trim().orEmpty(),
+    )
 }
 
 /** Fetches text over HTTP; an interface so parsing can be tested without a network. */
